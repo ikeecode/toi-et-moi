@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Toi et Moi - Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&amp;family=Manrope:wght@200..800&amp;family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary": "#ffadf9",
+                    "secondary-fixed-dim": "#d4bbff",
+                    "on-background": "#ecddfb",
+                    "tertiary-fixed-dim": "#ffb1c1",
+                    "surface": "#180f24",
+                    "on-tertiary-fixed": "#3f0018",
+                    "inverse-surface": "#ecddfb",
+                    "on-tertiary-container": "#840039",
+                    "on-tertiary": "#66002a",
+                    "on-surface": "#ecddfb",
+                    "on-primary-fixed": "#37003a",
+                    "inverse-primary": "#a21ba8",
+                    "on-secondary-container": "#c6a5ff",
+                    "outline-variant": "#524250",
+                    "primary-container": "#ff77ff",
+                    "secondary": "#d4bbff",
+                    "on-secondary": "#400688",
+                    "on-secondary-fixed": "#260058",
+                    "on-primary-fixed-variant": "#7f0086",
+                    "surface-container-lowest": "#130a1f",
+                    "surface-container": "#251b31",
+                    "surface-container-low": "#21172d",
+                    "secondary-container": "#582a9f",
+                    "inverse-on-surface": "#362c43",
+                    "surface-container-high": "#2f263c",
+                    "primary-fixed-dim": "#ffaaf9",
+                    "on-secondary-fixed-variant": "#582a9f",
+                    "primary-fixed": "#ffd6f8",
+                    "on-tertiary-fixed-variant": "#8f003f",
+                    "background": "#180f24",
+                    "surface-variant": "#3a3047",
+                    "surface-tint": "#ffaaf9",
+                    "secondary-fixed": "#ebdcff",
+                    "outline": "#9f8b9b",
+                    "on-error": "#690005",
+                    "tertiary-container": "#ff88a5",
+                    "tertiary-fixed": "#ffd9df",
+                    "on-primary": "#5a005f",
+                    "error": "#ffb4ab",
+                    "on-primary-container": "#75007b",
+                    "surface-bright": "#3f354c",
+                    "on-error-container": "#ffdad6",
+                    "tertiary": "#ffb4c3",
+                    "error-container": "#93000a",
+                    "surface-container-highest": "#3a3047",
+                    "surface-dim": "#180f24",
+                    "on-surface-variant": "#d7c0d1"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Geist", "Manrope"],
+                    "body": ["Manrope"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .memory-orb {
+            backdrop-filter: blur(20px);
+            box-shadow: inset 2px 2px 10px rgba(255, 173, 249, 0.1);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body min-h-screen selection:bg-primary/30 relative overflow-x-hidden">
+<!-- Celestial Background Orbs -->
+<div class="fixed top-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-[#ff77ff]/10 blur-[120px] -z-10"></div>
+<div class="fixed bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-[#582a9f]/20 blur-[100px] -z-10"></div>
+<!-- Top Navigation Shell -->
+<header class="flex justify-between items-center w-full px-6 h-16 bg-[#180f24]/60 backdrop-blur-xl docked full-width top-0 z-50 fixed">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#ffadf9]" data-icon="arrow_back">arrow_back</span>
+<h1 class="font-['Geist'] tracking-tight text-2xl font-light italic text-[#ffadf9]">Toi et Moi</h1>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant hover:opacity-80 transition-opacity cursor-pointer" data-icon="logout">logout</span>
+<div class="w-8 h-8 rounded-full bg-gradient-to-tr from-secondary to-primary flex items-center justify-center text-[10px] font-bold text-on-primary-fixed">
+                JM
+            </div>
+</div>
+</header>
+<main class="pt-24 pb-32 px-6 max-w-md mx-auto space-y-8">
+<!-- Header & Counter -->
+<section class="space-y-1">
+<div class="flex justify-between items-end">
+<h2 class="text-3xl font-headline font-light italic tracking-tight text-on-surface">Jean &amp; Marie</h2>
+<div class="flex items-center gap-1.5 text-primary bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
+<span class="material-symbols-outlined text-[18px]" data-icon="auto_awesome" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="text-sm font-label font-medium">1 245 jours</span>
+</div>
+</div>
+</section>
+<!-- Partner Status -->
+<section class="glass-card rounded-3xl p-6 flex items-center gap-6">
+<div class="flex -space-x-4">
+<div class="w-16 h-16 rounded-full border-2 border-surface bg-gradient-to-tr from-[#582a9f] to-[#ffadf9] flex items-center justify-center font-headline font-semibold text-lg">J</div>
+<div class="w-16 h-16 rounded-full border-2 border-surface bg-gradient-to-tr from-[#d4bbff] to-[#ff77ff] flex items-center justify-center font-headline font-semibold text-lg">M</div>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-lg font-headline font-medium text-on-surface">Jean &amp; Marie</span>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_8px_#ffadf9]"></span>
+<span class="text-xs font-label uppercase tracking-widest text-primary font-bold">Connectés</span>
+</div>
+</div>
+</section>
+<!-- Daily Question (Memory Orb Style) -->
+<section class="memory-orb rounded-[2rem] p-8 bg-gradient-to-br from-primary/10 to-transparent border border-white/5 relative overflow-hidden">
+<div class="absolute -top-12 -right-12 w-32 h-32 bg-primary/10 blur-3xl rounded-full"></div>
+<div class="space-y-4 relative z-10">
+<div class="flex items-center gap-2">
+<span class="text-[10px] font-label font-bold uppercase tracking-[0.2em] text-[#ffd700]">Question du jour</span>
+<div class="h-px w-8 bg-[#ffd700]/30"></div>
+</div>
+<p class="text-2xl font-headline font-light leading-snug text-on-background italic">
+                    Quel est ton souvenir préféré de nous ?
+                </p>
+<button class="mt-4 flex items-center gap-2 text-primary font-label text-sm hover:translate-x-1 transition-transform">
+                    Répondre à Marie
+                    <span class="material-symbols-outlined text-sm" data-icon="east">east</span>
+</button>
+</div>
+</section>
+<!-- Navigation Bento Grid -->
+<section class="grid grid-cols-2 gap-4">
+<!-- 36 Questions -->
+<div class="glass-card rounded-[2rem] p-5 flex flex-col gap-4 aspect-square active:scale-95 transition-all">
+<div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#582a9f] to-[#ffadf9] flex items-center justify-center">
+<span class="material-symbols-outlined text-surface" data-icon="quiz" style="font-variation-settings: 'FILL' 1;">quiz</span>
+</div>
+<div class="mt-auto">
+<h3 class="font-headline font-medium text-on-surface">36 Questions</h3>
+<p class="text-[10px] font-label text-on-surface-variant uppercase tracking-wider">Tomber amoureux</p>
+</div>
+</div>
+<!-- Souvenirs -->
+<div class="glass-card rounded-[2rem] p-5 flex flex-col gap-4 aspect-square active:scale-95 transition-all">
+<div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#ff77ff] to-[#ffb1c1] flex items-center justify-center">
+<span class="material-symbols-outlined text-surface" data-icon="favorite" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</div>
+<div class="mt-auto">
+<h3 class="font-headline font-medium text-on-surface">Souvenirs</h3>
+<p class="text-[10px] font-label text-on-surface-variant uppercase tracking-wider">Notre histoire</p>
+</div>
+</div>
+<!-- Calendrier -->
+<div class="glass-card rounded-[2rem] p-5 flex flex-col gap-4 aspect-square active:scale-95 transition-all">
+<div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#260058] to-[#d4bbff] flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface" data-icon="calendar_today" style="font-variation-settings: 'FILL' 1;">calendar_today</span>
+</div>
+<div class="mt-auto">
+<h3 class="font-headline font-medium text-on-surface">Calendrier</h3>
+<p class="text-[10px] font-label text-on-surface-variant uppercase tracking-wider">Dates à venir</p>
+</div>
+</div>
+<!-- Inviter Partenaire -->
+<div class="glass-card rounded-[2rem] p-5 flex flex-col gap-4 aspect-square active:scale-95 transition-all relative">
+<div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#ff88a5] to-[#ffaaf9] flex items-center justify-center">
+<span class="material-symbols-outlined text-surface" data-icon="person_add" style="font-variation-settings: 'FILL' 1;">person_add</span>
+</div>
+<div class="mt-auto">
+<h3 class="font-headline font-medium text-on-surface">Partenaire</h3>
+<p class="text-[10px] font-label text-on-surface-variant uppercase tracking-wider">En attente...</p>
+</div>
+<!-- Subtle indicator -->
+<div class="absolute top-4 right-4 w-2 h-2 rounded-full bg-amber-400 blur-[2px]"></div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Shell -->
+<nav class="fixed bottom-6 left-0 right-0 z-50 flex justify-around items-center px-4 h-20 max-w-md mx-auto bg-[#130a1f]/40 backdrop-blur-2xl w-[90%] rounded-full border border-white/10 shadow-[0_20px_40px_rgba(255,173,249,0.08)]">
+<a class="bg-gradient-to-tr from-[#ffadf9] to-[#ff77ff] text-[#130a1f] rounded-full p-3 active:scale-90 duration-200 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="home_max" style="font-variation-settings: 'FILL' 1;">home_max</span>
+</a>
+<a class="text-[#d4bbff] p-3 hover:text-[#ffadf9] transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span>
+</a>
+<a class="text-[#d4bbff] p-3 hover:text-[#ffadf9] transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+</a>
+<a class="text-[#d4bbff] p-3 hover:text-[#ffadf9] transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="person_heart">person_heart</span>
+</a>
+</nav>
+</body></html>

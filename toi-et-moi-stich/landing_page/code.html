@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@300;400;700&amp;family=Geist:ital,wght@0,100..900;1,100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Manrope', sans-serif;
+            background-color: #180f24;
+        }
+        .geist-italic {
+            font-family: 'Geist', sans-serif;
+            font-style: italic;
+        }
+        .celestial-blur {
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary": "#ffadf9",
+                    "secondary-fixed-dim": "#d4bbff",
+                    "on-background": "#ecddfb",
+                    "tertiary-fixed-dim": "#ffb1c1",
+                    "surface": "#180f24",
+                    "on-tertiary-fixed": "#3f0018",
+                    "inverse-surface": "#ecddfb",
+                    "on-tertiary-container": "#840039",
+                    "on-tertiary": "#66002a",
+                    "on-surface": "#ecddfb",
+                    "on-primary-fixed": "#37003a",
+                    "inverse-primary": "#a21ba8",
+                    "on-secondary-container": "#c6a5ff",
+                    "outline-variant": "#524250",
+                    "primary-container": "#ff77ff",
+                    "secondary": "#d4bbff",
+                    "on-secondary": "#400688",
+                    "on-secondary-fixed": "#260058",
+                    "on-primary-fixed-variant": "#7f0086",
+                    "surface-container-lowest": "#130a1f",
+                    "surface-container": "#251b31",
+                    "surface-container-low": "#21172d",
+                    "secondary-container": "#582a9f",
+                    "inverse-on-surface": "#362c43",
+                    "surface-container-high": "#2f263c",
+                    "primary-fixed-dim": "#ffaaf9",
+                    "on-secondary-fixed-variant": "#582a9f",
+                    "primary-fixed": "#ffd6f8",
+                    "on-tertiary-fixed-variant": "#8f003f",
+                    "background": "#180f24",
+                    "surface-variant": "#3a3047",
+                    "surface-tint": "#ffaaf9",
+                    "secondary-fixed": "#ebdcff",
+                    "outline": "#9f8b9b",
+                    "on-error": "#690005",
+                    "tertiary-container": "#ff88a5",
+                    "tertiary-fixed": "#ffd9df",
+                    "on-primary": "#5a005f",
+                    "error": "#ffb4ab",
+                    "on-primary-container": "#75007b",
+                    "surface-bright": "#3f354c",
+                    "on-error-container": "#ffdad6",
+                    "tertiary": "#ffb4c3",
+                    "error-container": "#93000a",
+                    "surface-container-highest": "#3a3047",
+                    "surface-dim": "#180f24",
+                    "on-surface-variant": "#d7c0d1"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Manrope"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen overflow-x-hidden selection:bg-primary/30">
+<!-- Decorative Nebula Background -->
+<div class="fixed inset-0 pointer-events-none z-0">
+<div class="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-primary/10 rounded-full blur-[120px]"></div>
+<div class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-secondary/10 rounded-full blur-[120px]"></div>
+<!-- Scattered Stars -->
+<div class="absolute top-20 left-1/4 w-1 h-1 bg-white rounded-full animate-pulse opacity-40"></div>
+<div class="absolute top-1/3 right-1/4 w-0.5 h-0.5 bg-white rounded-full animate-pulse opacity-60"></div>
+<div class="absolute bottom-1/4 left-1/3 w-1 h-1 bg-primary rounded-full animate-pulse opacity-30"></div>
+<div class="absolute top-1/2 right-1/2 w-0.5 h-0.5 bg-secondary rounded-full animate-pulse opacity-50"></div>
+</div>
+<!-- Top Navigation (Suppressing shared TopAppBar for Landing Focus) -->
+<header class="relative z-50 flex justify-between items-center w-full px-8 h-20">
+<div class="geist-italic text-2xl font-light italic text-primary">Toi et Moi</div>
+<nav class="hidden md:flex gap-8 items-center">
+<a class="text-on-surface-variant hover:text-primary transition-colors text-sm font-label uppercase tracking-widest" href="#">Vision</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors text-sm font-label uppercase tracking-widest" href="#">Confidentialité</a>
+<a class="px-6 py-2 rounded-full border border-outline-variant/20 text-on-surface hover:bg-surface-container-high transition-all text-sm font-medium" href="#">Déjà un compte ?</a>
+</nav>
+</header>
+<main class="relative z-10">
+<!-- Hero Section -->
+<section class="flex flex-col items-center justify-center min-h-[751px] px-6 text-center max-w-5xl mx-auto">
+<div class="mb-6 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-surface-container-low border border-outline-variant/10 celestial-blur">
+<span class="material-symbols-outlined text-[18px] text-primary" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="text-xs font-label uppercase tracking-[0.2em] text-on-surface-variant">L'intimité réinventée</span>
+</div>
+<h1 class="geist-italic text-7xl md:text-9xl font-extralight italic text-primary leading-none tracking-tighter mb-8">
+                Toi et Moi
+            </h1>
+<p class="text-xl md:text-2xl font-light text-on-background/80 max-w-2xl mb-12 leading-relaxed">
+                Un espace numérique privé pour deux. <br class="hidden md:block"/> 
+                Cultivez votre connexion, loin du bruit du monde.
+            </p>
+<div class="flex flex-col sm:flex-row gap-6 items-center">
+<button class="group relative px-10 py-5 rounded-full overflow-hidden transition-all duration-300 active:scale-95 shadow-[0_20px_40px_rgba(255,173,249,0.15)]">
+<div class="absolute inset-0 bg-gradient-to-tr from-primary to-primary-container transition-transform group-hover:scale-105"></div>
+<span class="relative text-on-primary-fixed font-bold text-lg tracking-wide">Créer votre espace</span>
+</button>
+<a class="text-on-surface-variant hover:text-primary transition-colors border-b border-transparent hover:border-primary/40 py-1 text-sm font-medium tracking-wide" href="#">
+                    Déjà un compte ? Se connecter
+                </a>
+</div>
+<!-- Hero Image/Visual -->
+<div class="mt-24 w-full max-w-4xl rounded-[2rem] overflow-hidden aspect-[16/9] relative group">
+<div class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent z-20"></div>
+<img class="w-full h-full object-cover transform scale-105 group-hover:scale-100 transition-transform duration-[2s] z-10" data-alt="Dreamy artistic photo of two people holding hands silhouetted against a soft purple and blue galaxy nebula background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvwqbrFF0JX0EM4LIy8kiOT6_ViqjweLJ2xoXsmrzKAHASns27CncJypJwJHlp1FgzO2Iw0d9F98NMYZPC__fnhtYjOfW1f5S3ct2BwGuZoMuL3wI2FLZ07Jn6UuhyEAWTtSKC_mcK309t2HNZ2rgbtb9g0mcpAe__GO_Y6YZsqm82bwjJJ6Srs4pX2wbl8Il1EgLt6zob9D5sP1jqc7eEOhC5qrOWr7BcKFegMfye4sP_IEDa37OprKw4glxLx_VoqRXeQ4CT_Dxt"/>
+<div class="absolute bottom-8 left-8 z-30 text-left">
+<div class="w-12 h-12 rounded-full celestial-blur border border-white/10 flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-primary">favorite</span>
+</div>
+<p class="text-sm font-label text-white/60 italic">"La distance n'est qu'une illusion quand les cœurs sont synchronisés."</p>
+</div>
+</div>
+</section>
+<!-- Features Grid -->
+<section class="py-32 px-6 max-w-7xl mx-auto">
+<div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
+<div class="max-w-xl">
+<h2 class="text-4xl font-light mb-4">Conçu pour la <span class="italic text-primary font-geist">proximité</span></h2>
+<p class="text-on-surface-variant leading-relaxed">Chaque fonctionnalité est pensée pour renforcer le lien unique qui vous unit, avec une confidentialité absolue par design.</p>
+</div>
+<div class="hidden md:block h-[1px] flex-1 mx-12 bg-outline-variant/10 mb-4"></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Card 1: Souvenirs partagés -->
+<div class="p-8 rounded-[2rem] bg-surface-container-low border border-white/5 celestial-blur group hover:bg-surface-container-high transition-all duration-500">
+<div class="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-primary" data-icon="photo_library">photo_library</span>
+</div>
+<h3 class="text-2xl font-light mb-4">Souvenirs partagés</h3>
+<p class="text-on-surface-variant leading-relaxed mb-6">Un album infini et sécurisé pour vos photos les plus précieuses. Organisé par moments de vie.</p>
+<div class="w-full aspect-video rounded-xl overflow-hidden">
+<img class="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" data-alt="close up of Polaroid photos of a happy couple lying on a dark wooden table with soft candle light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3MV2Dw0JrXJmuKT121CoEBxnvFFI_jTNU65dFb3RV4MVqpTDGQzOiIFKrsrzjedUiu8VMVDrwsDAEgMij4ybUdR941zsdy4lfDBfNBtfExF_3zBDVkPo25GoReqvFFalq-W-R672HMmYqkDwHYhN0V09WYDBF3-B_OhILokEqrpGEcZRsgFopbLXwkJ7RqQnR0xAb5AmsCU1ZqhksovPlUtiTJ0SH88WiJ86eYia352i-a60fFfMLV5GO4Du8O276AVbBG1F1ba6N"/>
+</div>
+</div>
+<!-- Card 2: 36 Questions -->
+<div class="p-8 rounded-[2rem] bg-surface-container-low border border-white/5 celestial-blur group hover:bg-surface-container-high transition-all duration-500 md:mt-12">
+<div class="w-14 h-14 rounded-full bg-secondary/10 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-secondary" data-icon="auto_awesome_motion">auto_awesome_motion</span>
+</div>
+<h3 class="text-2xl font-light mb-4">36 Questions</h3>
+<p class="text-on-surface-variant leading-relaxed mb-6">Découvrez de nouvelles facettes de votre partenaire grâce à nos jeux de questions guidés et thématiques.</p>
+<div class="flex -space-x-4">
+<div class="w-12 h-12 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center border-4 border-surface font-bold text-on-primary-fixed">T</div>
+<div class="w-12 h-12 rounded-full bg-gradient-to-tr from-secondary to-primary-container flex items-center justify-center border-4 border-surface font-bold text-on-primary-fixed">M</div>
+</div>
+</div>
+<!-- Card 3: Notre calendrier -->
+<div class="p-8 rounded-[2rem] bg-surface-container-low border border-white/5 celestial-blur group hover:bg-surface-container-high transition-all duration-500">
+<div class="w-14 h-14 rounded-full bg-tertiary-container/10 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-tertiary" data-icon="calendar_month">calendar_month</span>
+</div>
+<h3 class="text-2xl font-light mb-4">Notre calendrier</h3>
+<p class="text-on-surface-variant leading-relaxed mb-6">Ne manquez plus aucun anniversaire ou rendez-vous important. Planifiez vos prochaines aventures ensemble.</p>
+<div class="p-4 rounded-xl bg-surface-container-highest/30 border border-white/5">
+<div class="flex justify-between items-center mb-2">
+<span class="text-xs font-label text-on-surface-variant">PROCHAIN RENDEZ-VOUS</span>
+<span class="text-xs font-bold text-primary">SAMEDI</span>
+</div>
+<p class="text-sm">Dîner aux chandelles au bord de l'eau</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Memory Orb Section (The "Memory Orb" Special Component) -->
+<section class="py-24 px-6 flex flex-col items-center overflow-hidden">
+<div class="relative w-80 h-80 flex items-center justify-center">
+<!-- The Memory Orb -->
+<div class="absolute inset-0 rounded-full border border-white/20 celestial-blur shadow-[inset_0_4px_24px_rgba(255,255,255,0.1)] flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover scale-125 opacity-40" data-alt="Blurred silhouettes of a couple laughing under a warm streetlamp at night, artistic and soft focus" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAEhDl6zNcI5QRun-f819arQu3_gQBU7J3NX6q_CnTuF2GxYDmrvEvTjiKPD3YwjATsMeVS6GJU1Gbc1d8TCp4tv6wCOiqkSweGgzC56gJbUw4hLZDcpyXCgTCU7GOLyJkYxwmxT0OsRzRQMclRLcqMnf4FvdjvbCGaxuZtdnWdMm_JnACRP9Ak-uIVDhMJNSK0H6CzpjrqI4762RxAXfb90qPoeg772DNi10iytU11OpWBD-YAyKQa2VN3JAs-FJSarEYX02LmSHmp"/>
+<div class="absolute inset-0 bg-primary/5"></div>
+</div>
+<div class="relative z-10 text-center px-8">
+<span class="text-xs font-label text-primary/80 uppercase tracking-widest mb-2 block">Dernier Moment</span>
+<h4 class="text-xl font-light">Escapade à Paris</h4>
+</div>
+</div>
+<p class="mt-12 text-on-surface-variant max-w-sm text-center italic font-light">"Chaque interaction laisse une trace dans votre ciel partagé."</p>
+</section>
+<!-- Final CTA Section -->
+<section class="py-40 px-6 text-center">
+<div class="max-w-3xl mx-auto p-12 rounded-[3rem] bg-gradient-to-b from-surface-container-low to-transparent border border-white/5 relative">
+<h2 class="geist-italic text-5xl font-light italic text-primary mb-6">Commencez votre voyage</h2>
+<p class="text-lg text-on-surface-variant mb-10 leading-relaxed">
+                    Rejoignez les milliers de couples qui cultivent leur jardin secret sur Toi et Moi.
+                </p>
+<button class="px-12 py-4 rounded-full bg-white text-surface-container-lowest font-bold hover:scale-105 transition-transform">
+                    Ouvrir votre compte gratuit
+                </button>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="py-16 px-8 border-t border-white/5 bg-surface-container-lowest">
+<div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start gap-12">
+<div class="max-w-xs">
+<div class="geist-italic text-2xl font-light italic text-primary mb-6">Toi et Moi</div>
+<p class="text-sm text-on-surface-variant leading-relaxed">
+                    L'application conçue pour l'intimité, sans publicité, sans collecte de données, juste pour vous deux.
+                </p>
+</div>
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-12">
+<div>
+<h5 class="text-sm font-bold mb-6 text-on-surface">App</h5>
+<ul class="space-y-4 text-sm text-on-surface-variant">
+<li><a class="hover:text-primary" href="#">Fonctionnalités</a></li>
+<li><a class="hover:text-primary" href="#">Sécurité</a></li>
+<li><a class="hover:text-primary" href="#">Télécharger</a></li>
+</ul>
+</div>
+<div>
+<h5 class="text-sm font-bold mb-6 text-on-surface">Compagnie</h5>
+<ul class="space-y-4 text-sm text-on-surface-variant">
+<li><a class="hover:text-primary" href="#">Notre histoire</a></li>
+<li><a class="hover:text-primary" href="#">Blog</a></li>
+<li><a class="hover:text-primary" href="#">Contact</a></li>
+</ul>
+</div>
+<div>
+<h5 class="text-sm font-bold mb-6 text-on-surface">Légal</h5>
+<ul class="space-y-4 text-sm text-on-surface-variant">
+<li><a class="hover:text-primary" href="#">Confidentialité</a></li>
+<li><a class="hover:text-primary" href="#">CGU</a></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="max-w-7xl mx-auto mt-20 flex flex-col sm:flex-row justify-between items-center gap-6">
+<p class="text-xs text-on-surface-variant/60 font-label uppercase tracking-widest">© 2024 Toi et Moi App. Fait avec amour.</p>
+<div class="flex gap-6">
+<a class="text-on-surface-variant/60 hover:text-primary" href="#"><span class="material-symbols-outlined text-lg">public</span></a>
+<a class="text-on-surface-variant/60 hover:text-primary" href="#"><span class="material-symbols-outlined text-lg">camera</span></a>
+</div>
+</div>
+</footer>
+<!-- BottomNavBar (Hidden on desktop, shown on mobile as per requirement) -->
+<nav class="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] z-50 flex justify-around items-center px-4 h-20 rounded-full bg-[#130a1f]/40 backdrop-blur-2xl border border-white/10 shadow-[0_20px_40px_rgba(255,173,249,0.08)]">
+<a class="text-primary bg-gradient-to-tr from-[#ffadf9] to-[#ff77ff] rounded-full p-3 transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home_max</span>
+</a>
+<a class="text-[#d4bbff] p-3 hover:text-[#ffadf9] transition-all" href="#">
+<span class="material-symbols-outlined">auto_awesome</span>
+</a>
+<a class="text-[#d4bbff] p-3 hover:text-[#ffadf9] transition-all" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+</a>
+<a class="text-[#d4bbff] p-3 hover:text-[#ffadf9] transition-all" href="#">
+<span class="material-symbols-outlined">person_heart</span>
+</a>
+</nav>
+</body></html>

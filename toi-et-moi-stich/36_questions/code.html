@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&amp;family=Manrope:wght@200..800&amp;family=Inter:wght@100..900&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary": "#ffadf9",
+                      "secondary-fixed-dim": "#d4bbff",
+                      "on-background": "#ecddfb",
+                      "tertiary-fixed-dim": "#ffb1c1",
+                      "surface": "#180f24",
+                      "on-tertiary-fixed": "#3f0018",
+                      "inverse-surface": "#ecddfb",
+                      "on-tertiary-container": "#840039",
+                      "on-tertiary": "#66002a",
+                      "on-surface": "#ecddfb",
+                      "on-primary-fixed": "#37003a",
+                      "inverse-primary": "#a21ba8",
+                      "on-secondary-container": "#c6a5ff",
+                      "outline-variant": "#524250",
+                      "primary-container": "#ff77ff",
+                      "secondary": "#d4bbff",
+                      "on-secondary": "#400688",
+                      "on-secondary-fixed": "#260058",
+                      "on-primary-fixed-variant": "#7f0086",
+                      "surface-container-lowest": "#130a1f",
+                      "surface-container": "#251b31",
+                      "surface-container-low": "#21172d",
+                      "secondary-container": "#582a9f",
+                      "inverse-on-surface": "#362c43",
+                      "surface-container-high": "#2f263c",
+                      "primary-fixed-dim": "#ffaaf9",
+                      "on-secondary-fixed-variant": "#582a9f",
+                      "primary-fixed": "#ffd6f8",
+                      "on-tertiary-fixed-variant": "#8f003f",
+                      "background": "#180f24",
+                      "surface-variant": "#3a3047",
+                      "surface-tint": "#ffaaf9",
+                      "secondary-fixed": "#ebdcff",
+                      "outline": "#9f8b9b",
+                      "on-error": "#690005",
+                      "tertiary-container": "#ff88a5",
+                      "tertiary-fixed": "#ffd9df",
+                      "on-primary": "#5a005f",
+                      "error": "#ffb4ab",
+                      "on-error-container": "#ffdad6",
+                      "tertiary": "#ffb4c3",
+                      "error-container": "#93000a",
+                      "surface-container-highest": "#3a3047",
+                      "surface-dim": "#180f24",
+                      "on-surface-variant": "#d7c0d1"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "fontFamily": {
+                      "headline": ["Manrope"],
+                      "body": ["Manrope"],
+                      "label": ["Inter"]
+              }
+            },
+          },
+        }
+      </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .memory-orb {
+            backdrop-filter: blur(20px);
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            box-shadow: inset 2px 2px 5px rgba(255, 255, 255, 0.1), inset -2px -2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .celestial-orb {
+            filter: blur(80px);
+            z-index: -1;
+        }
+        .asymmetric-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body min-h-screen overflow-x-hidden">
+<!-- Background Orbs -->
+<div class="fixed top-[-10%] left-[-10%] w-[50%] h-[50%] celestial-orb bg-primary/20 rounded-full"></div>
+<div class="fixed bottom-[-20%] right-[-10%] w-[60%] h-[60%] celestial-orb bg-secondary-container/30 rounded-full"></div>
+<!-- Top Navigation Shell -->
+<header class="bg-[#180f24]/60 backdrop-blur-xl fixed top-0 z-50 flex justify-between items-center w-full px-6 h-16">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#ffadf9] cursor-pointer hover:opacity-80 transition-opacity scale-95 duration-300">arrow_back</span>
+<div class="flex flex-col">
+<h1 class="font-['Geist'] tracking-tight headline-lg italic text-[#ffadf9] leading-none">36 Questions</h1>
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant/70 font-label">Qui mènent à l'amour</p>
+</div>
+</div>
+<!-- Presence Indicators -->
+<div class="hidden md:flex items-center gap-3 bg-surface-container-highest/40 px-4 py-2 rounded-full border border-outline-variant/10">
+<div class="flex -space-x-2">
+<div class="relative">
+<img alt="Partner 1" class="w-8 h-8 rounded-full border-2 border-surface" data-alt="close-up portrait of a woman with soft lighting and a warm smile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtlklkB267MOd-XW4l9ZPoxc8JXYhIQBzLyJdRHISuA-ud2bbZH4b-TXYOtvaTxOdS0gXFfM4tUJtcX5IQrE_D-MasH1tlxTD7spHnYDUuH5hsFt1ceFKO6YuJ_5iIoPzKHUxswf_zD9JurQaqFYqz6jro04jcVYpD7JFE9Y4dyBXwUzJLFcBSGfA4LbU1m2jGTkp1PQ10Vt7eZyyCwqvlj5vZtykQ8Mtsa4peOeNANemwWhaoBZ2ky8qLak4hE0YrF0XKJJMLDJi8"/>
+<span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-surface rounded-full"></span>
+</div>
+<div class="relative">
+<img alt="Partner 2" class="w-8 h-8 rounded-full border-2 border-surface" data-alt="close-up portrait of a man with gentle expression and soft focus background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZJJz2ZVsvUgz6UVGE_Ojy94lfqQdYzPGwECBt3KH-APsQR0ofRm61bHQY0K_Y3SShPtiv2bDi5STcCPqh_bHaP7q_PD-VMqFxasCkeXR75Hpmn-eQRy5F5xNOc_ia5H1wc_2ZBqojLRgtRZCslwn0_o_iD8dWfH_ugXDPtODqGMTQAfbBIqmXKIx1NhBOU4dXyWiEkBZZsp-DtLLaqBdoyLzkySVPfdWsqoCOlrqOtb-SB4bikus4hXn_ARkqsn81R839KkxTpC3u"/>
+<span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-surface rounded-full"></span>
+</div>
+</div>
+<span class="text-xs font-label text-primary font-medium">Connectés</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="text-right hidden sm:block">
+<p class="text-[10px] font-label text-on-surface-variant uppercase tracking-tighter">Progression</p>
+<p class="text-sm font-bold text-primary">14 / 36</p>
+</div>
+<div class="w-10 h-10 rounded-full bg-gradient-to-tr from-secondary to-primary flex items-center justify-center text-on-primary-fixed font-bold text-xs">
+                JD
+            </div>
+</div>
+</header>
+<main class="pt-24 pb-32 px-6 max-w-4xl mx-auto min-h-screen">
+<!-- Tab Navigation (Séries) -->
+<nav class="flex justify-center gap-8 mb-12 border-b border-outline-variant/10">
+<button class="pb-4 text-sm font-label tracking-widest uppercase text-on-surface-variant hover:text-primary transition-colors">Série I</button>
+<button class="pb-4 text-sm font-label tracking-widest uppercase text-primary border-b-2 border-primary">Série II</button>
+<button class="pb-4 text-sm font-label tracking-widest uppercase text-on-surface-variant hover:text-primary transition-colors">Série III</button>
+</nav>
+<!-- Question Section -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+<!-- Question Content Card -->
+<div class="lg:col-span-8">
+<div class="memory-orb p-12 rounded-[2rem] border border-white/5 relative overflow-hidden group">
+<!-- Subtle Glow in corner -->
+<div class="absolute -top-24 -right-24 w-48 h-48 bg-primary/10 blur-[60px] rounded-full"></div>
+<div class="flex items-center gap-3 mb-8">
+<span class="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-label uppercase tracking-widest text-primary">Série II</span>
+<span class="text-on-surface-variant font-label text-sm opacity-60">Question 14</span>
+</div>
+<h2 class="text-3xl md:text-5xl font-light italic leading-tight text-on-background mb-12">
+                        « Qu'est-ce qui te fait le plus rire chez moi ? »
+                    </h2>
+<div class="flex flex-wrap items-center gap-6">
+<button class="flex items-center gap-2 bg-gradient-to-tr from-primary to-primary-container px-8 py-4 rounded-full text-on-primary-fixed font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-primary/10">
+                            Marquer comme discuté
+                            <span class="material-symbols-outlined text-lg">check_circle</span>
+</button>
+<!-- Real-time Synced Controls -->
+<div class="flex items-center gap-3">
+<button class="w-12 h-12 rounded-full border border-outline-variant/30 flex items-center justify-center hover:bg-surface-container-highest/40 transition-colors">
+<span class="material-symbols-outlined">navigate_before</span>
+</button>
+<button class="w-12 h-12 rounded-full border border-outline-variant/30 flex items-center justify-center hover:bg-surface-container-highest/40 transition-colors">
+<span class="material-symbols-outlined">navigate_next</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Waiting / Side State (Asymmetric offset) -->
+<div class="lg:col-span-4 lg:pl-8">
+<div class="space-y-8">
+<div class="flex flex-col items-center lg:items-start space-y-4">
+<div class="flex -space-x-4">
+<div class="w-16 h-16 rounded-full border-4 border-surface ring-2 ring-primary/20 overflow-hidden">
+<img alt="Me" data-alt="aesthetic close-up of a smiling young woman with soft cinematic lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzfcwJ2FYO2FQkhUJAEqnivAseWb2LWZI8aKH4ibtNDZStvYmf8O8mEpz2VKFlHEPbGuU_Gj2cq4VddortbdPhp-rZp0uqsCQoiDtVU2w0doWzfN9yFbLxK8RnGH-RfNDFkehYv8dP4Lps3YRPyfPB_bzCIcyhqVAFazvLAx5ShV74FBdobkpi7Xl6AH0t8qKwkc9SkLxObf2QIqwucLb8-j7wTpZ4D3ZclGCAnPXxr1PIrS2pOC9KsS2UX01ImuiAJNrna1v7I6d5"/>
+</div>
+<div class="w-16 h-16 rounded-full border-4 border-surface ring-2 ring-primary/20 overflow-hidden relative">
+<div class="absolute inset-0 bg-primary/20 animate-pulse"></div>
+<img alt="Partner" class="opacity-50 grayscale" data-alt="blurred silhouette of a man in a cozy indoor setting with warm ambient light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC02vyoJLMEFSBkcPF44Zscm9hYuP06stDMKl6cRmYxYcXFgn2aDH9Uy9ijzsvblSNaJlGsH6LSe-W8occLSj70bVrxUBjxs8D_YceW2hsx5ZvnVOHDIs4e5Wfv2Q_9vWqgGIUxjgMpmw0mRM1haKX7xr_6UmNJQqwBYjwG0qVRNFK8stQcFFIm4B-8W_l3gFYS_SiCVrt46pTr5POj9d_Vd49PC0o513EQ1mVJw9JGMo6Q6cCVsKnN8lgpakCKQg4_h8IFohIH-FQl"/>
+</div>
+</div>
+<div class="text-center lg:text-left">
+<p class="text-sm font-label text-on-surface-variant animate-pulse">En attente de Thomas...</p>
+<p class="text-xs text-on-surface-variant/40 mt-1 italic">Prêt pour la suite ?</p>
+</div>
+</div>
+<!-- Small Insight Card -->
+<div class="bg-surface-container-low/40 p-6 rounded-2xl border border-outline-variant/5">
+<p class="text-[10px] font-label uppercase tracking-widest text-secondary-fixed-dim mb-3">Conseil d'intimité</p>
+<p class="text-sm text-on-surface-variant leading-relaxed italic font-light">
+                            "L'humour est le pont le plus court entre deux âmes. Prenez le temps de savourer cette réponse."
+                        </p>
+</div>
+</div>
+</div>
+</div>
+<!-- Horizontal Bento Grid Section for context -->
+<section class="mt-20">
+<h3 class="text-xl font-light italic mb-8 px-2 text-on-surface-variant opacity-80">Nos souvenirs récents</h3>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+<div class="col-span-2 h-48 rounded-3xl overflow-hidden relative group cursor-pointer">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="romantic couple holding hands while walking in a dark forest with magical golden string lights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDicX7XQd-zuL9VMa06yaRT80zYtEeRRLWzwNewlLbDHUu9uEoMKj0k8XkJSy9U49gPga54TqJJjY1tMnN8Vyh09eLcWAxrfa9zhhdR4BOQ1AXzDOe4kxxeepOk9Ks2xeOgcT8hnBEKYRb9gm6qnm5-8dOZcN8AzOkhivZxI2fAJDwyCOiT0oGOgJj4FlF1AYRRSVUR0tOj-_gkFIA5UB6_6Ye6k0lF3HhGNn8-xLcqP3L0-keCgsZ-N2RJXI8gGXIWeTh3PDX8rvps"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest to-transparent opacity-60"></div>
+<div class="absolute bottom-4 left-4">
+<p class="text-xs font-label text-primary">Série I</p>
+<p class="text-sm font-medium">Tes premières impressions</p>
+</div>
+</div>
+<div class="h-48 rounded-3xl bg-surface-container-highest/30 border border-outline-variant/10 flex flex-col items-center justify-center p-4 text-center">
+<span class="material-symbols-outlined text-secondary text-3xl mb-2" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<p class="text-xs font-label">Moment Magique</p>
+</div>
+<div class="h-48 rounded-3xl overflow-hidden relative group">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="two polaroid photos lying on a wooden table with dried flowers and a soft candle light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtbKcirYUtKaANfUkY7bc2xJx_uISxvgi3ags48czQaWMteNrItDZF0xD6uJnVw8xwGLDgnZkriJJ2_VkFM3_za5xTiPb82MS5ICjvqi9iKvTUWvO13JtJCHtxP7rdrviq-K75tsaHN0IHW_pZuA5fZcm4egj_gbhgelthVBv-_5M5krkZR526mrZ0fNtaP6Z-mHi752O8cp-gtYbsu3u-kDOtunPfdtxajEkByfBVlNcccNJQg0u-i7gPXR8aVZHGoYIGwv8lxtPw"/>
+<div class="absolute inset-0 bg-black/20"></div>
+</div>
+</div>
+</section>
+</main>
+<!-- Navigation Shell (BottomNavBar) -->
+<nav class="fixed bottom-6 left-0 right-0 z-50 flex justify-around items-center px-4 h-20 max-w-md mx-auto bg-[#130a1f]/40 backdrop-blur-2xl rounded-full border border-white/10 shadow-[0_20px_40px_rgba(255,173,249,0.08)]">
+<a class="text-[#d4bbff] p-3 hover:text-[#ffadf9] transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">home_max</span>
+</a>
+<a class="bg-gradient-to-tr from-[#ffadf9] to-[#ff77ff] text-[#130a1f] rounded-full p-3 active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+</a>
+<a class="text-[#d4bbff] p-3 hover:text-[#ffadf9] transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+</a>
+<a class="text-[#d4bbff] p-3 hover:text-[#ffadf9] transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">person_heart</span>
+</a>
+</nav>
+</body></html>

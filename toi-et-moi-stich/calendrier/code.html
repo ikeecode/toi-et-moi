@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Toi et Moi - Calendrier</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&amp;family=Manrope:wght@200..800&amp;family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary": "#ffadf9",
+                    "secondary-fixed-dim": "#d4bbff",
+                    "on-background": "#ecddfb",
+                    "tertiary-fixed-dim": "#ffb1c1",
+                    "surface": "#180f24",
+                    "on-tertiary-fixed": "#3f0018",
+                    "inverse-surface": "#ecddfb",
+                    "on-tertiary-container": "#840039",
+                    "on-tertiary": "#66002a",
+                    "on-surface": "#ecddfb",
+                    "on-primary-fixed": "#37003a",
+                    "inverse-primary": "#a21ba8",
+                    "on-secondary-container": "#c6a5ff",
+                    "outline-variant": "#524250",
+                    "primary-container": "#ff77ff",
+                    "secondary": "#d4bbff",
+                    "on-secondary": "#400688",
+                    "on-secondary-fixed": "#260058",
+                    "on-primary-fixed-variant": "#7f0086",
+                    "surface-container-lowest": "#130a1f",
+                    "surface-container": "#251b31",
+                    "surface-container-low": "#21172d",
+                    "secondary-container": "#582a9f",
+                    "inverse-on-surface": "#362c43",
+                    "surface-container-high": "#2f263c",
+                    "primary-fixed-dim": "#ffaaf9",
+                    "on-secondary-fixed-variant": "#582a9f",
+                    "primary-fixed": "#ffd6f8",
+                    "on-tertiary-fixed-variant": "#8f003f",
+                    "background": "#180f24",
+                    "surface-variant": "#3a3047",
+                    "surface-tint": "#ffaaf9",
+                    "secondary-fixed": "#ebdcff",
+                    "outline": "#9f8b9b",
+                    "on-error": "#690005",
+                    "tertiary-container": "#ff88a5",
+                    "tertiary-fixed": "#ffd9df",
+                    "on-primary": "#5a005f",
+                    "error": "#ffb4ab",
+                    "on-primary-container": "#75007b",
+                    "surface-bright": "#3f354c",
+                    "on-error-container": "#ffdad6",
+                    "tertiary": "#ffb4c3",
+                    "error-container": "#93000a",
+                    "surface-container-highest": "#3a3047",
+                    "surface-dim": "#180f24",
+                    "on-surface-variant": "#d7c0d1"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Manrope"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .celestial-bg {
+            background-color: #180f24;
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            overflow: hidden;
+        }
+        .nebula-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.15;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen font-body selection:bg-primary selection:text-on-primary-fixed">
+<div class="celestial-bg">
+<div class="nebula-orb bg-primary w-96 h-96 -top-20 -left-20"></div>
+<div class="nebula-orb bg-secondary w-[500px] h-[500px] bottom-0 -right-20"></div>
+</div>
+<!-- TopAppBar -->
+<header class="bg-[#180f24]/60 backdrop-blur-xl flex justify-between items-center w-full px-6 h-16 docked full-width top-0 z-50">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#ffadf9] hover:opacity-80 transition-opacity cursor-pointer">arrow_back</span>
+<h1 class="font-['Geist'] tracking-tight headline-lg italic text-[#ffadf9] text-2xl font-light">Toi et Moi</h1>
+</div>
+<div class="w-10 h-10 rounded-full bg-gradient-to-tr from-secondary to-primary flex items-center justify-center text-on-primary-fixed font-bold text-sm shadow-lg">
+            JD
+        </div>
+</header>
+<main class="max-w-md mx-auto px-6 pt-24 pb-32">
+<!-- Calendar Header Section -->
+<div class="mb-12 flex flex-col gap-2">
+<h2 class="text-4xl font-headline font-light italic tracking-tight text-on-surface">Calendrier</h2>
+<div class="flex justify-between items-end">
+<p class="text-on-surface-variant text-sm max-w-[200px]">Gardez une trace de nos instants les plus précieux.</p>
+<button class="bg-gradient-to-tr from-primary to-primary-container text-on-primary-fixed px-5 py-2.5 rounded-xl font-label font-bold text-xs flex items-center gap-2 active:scale-95 duration-300 shadow-[0_10px_20px_rgba(255,173,249,0.15)]">
+<span class="material-symbols-outlined text-lg">add</span>
+                    Ajouter un événement
+                </button>
+</div>
+</div>
+<!-- Month Section: Mars 2026 -->
+<section class="mb-12">
+<div class="flex items-center gap-4 mb-6">
+<span class="text-xs font-label tracking-[0.2em] text-secondary-fixed-dim uppercase">Mars 2026</span>
+<div class="h-px flex-1 bg-outline-variant/20"></div>
+</div>
+<div class="flex flex-col gap-6">
+<!-- Event Card: Rendez-vous -->
+<div class="group relative bg-on-surface/[0.05] backdrop-blur-xl border border-white/10 rounded-2xl p-5 flex items-center justify-between transition-all hover:bg-on-surface/[0.08]">
+<div class="flex items-center gap-5">
+<div class="w-2.5 h-2.5 rounded-full bg-[#ffadf9] shadow-[0_0_12px_#ffadf9]"></div>
+<div>
+<h3 class="text-lg font-headline text-on-surface">Dîner aux chandelles</h3>
+<p class="text-on-surface-variant text-sm font-label uppercase tracking-widest mt-1">14 MARS • 20:30</p>
+</div>
+</div>
+<button class="text-outline hover:text-error transition-colors p-2">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+<!-- Event Card: Anniversaire de couple -->
+<div class="group relative bg-on-surface/[0.05] backdrop-blur-xl border border-white/10 rounded-2xl p-5 flex items-center justify-between transition-all hover:bg-on-surface/[0.08]">
+<div class="flex items-center gap-5">
+<div class="w-2.5 h-2.5 rounded-full bg-[#d4bbff] shadow-[0_0_12px_#d4bbff]"></div>
+<div>
+<h3 class="text-lg font-headline text-on-surface">3 ans ensemble</h3>
+<p class="text-on-surface-variant text-sm font-label uppercase tracking-widest mt-1">21 MARS • JOURNÉE</p>
+</div>
+</div>
+<button class="text-outline hover:text-error transition-colors p-2">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Month Section: Avril 2026 -->
+<section class="mb-12">
+<div class="flex items-center gap-4 mb-6">
+<span class="text-xs font-label tracking-[0.2em] text-secondary-fixed-dim uppercase">Avril 2026</span>
+<div class="h-px flex-1 bg-outline-variant/20"></div>
+</div>
+<div class="flex flex-col gap-6">
+<!-- Event Card: Anniversaire naissance -->
+<div class="group relative bg-on-surface/[0.05] backdrop-blur-xl border border-white/10 rounded-2xl p-5 flex items-center justify-between transition-all hover:bg-on-surface/[0.08]">
+<div class="flex items-center gap-5">
+<div class="w-2.5 h-2.5 rounded-full bg-[#FFBF00] shadow-[0_0_12px_#FFBF00]"></div>
+<div>
+<h3 class="text-lg font-headline text-on-surface">Anniversaire de Clara</h3>
+<p class="text-on-surface-variant text-sm font-label uppercase tracking-widest mt-1">04 AVRIL • TOUT LE MOIS</p>
+</div>
+</div>
+<button class="text-outline hover:text-error transition-colors p-2">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+<!-- Event Card: Autre -->
+<div class="group relative bg-on-surface/[0.05] backdrop-blur-xl border border-white/10 rounded-2xl p-5 flex items-center justify-between transition-all hover:bg-on-surface/[0.08]">
+<div class="flex items-center gap-5">
+<div class="w-2.5 h-2.5 rounded-full bg-[#00A3FF] shadow-[0_0_12px_#00A3FF]"></div>
+<div>
+<h3 class="text-lg font-headline text-on-surface">Départ en week-end</h3>
+<p class="text-on-surface-variant text-sm font-label uppercase tracking-widest mt-1">12 AVRIL • 08:00</p>
+</div>
+</div>
+<button class="text-outline hover:text-error transition-colors p-2">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Memory Orb (Thematic Highlight) -->
+<div class="mt-8 flex justify-center">
+<div class="relative w-40 h-40 rounded-full border border-white/10 backdrop-blur-[30px] flex flex-col items-center justify-center text-center p-6 shadow-[inset_0_4px_12px_rgba(255,173,249,0.1)]">
+<span class="material-symbols-outlined text-primary text-3xl mb-2" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="text-[10px] font-label uppercase tracking-widest text-on-surface-variant">Prochain instant</span>
+<span class="text-sm font-headline italic text-on-surface mt-1">Dans 3 jours</span>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] rounded-full border border-white/10 bg-[#130a1f]/40 backdrop-blur-2xl z-50 flex justify-around items-center px-4 h-20 max-w-md shadow-[0_20px_40px_rgba(255,173,249,0.08)]">
+<button class="text-[#d4bbff] p-3 hover:text-[#ffadf9] transition-all active:scale-90 duration-200">
+<span class="material-symbols-outlined" data-icon="home_max">home_max</span>
+</button>
+<button class="text-[#d4bbff] p-3 hover:text-[#ffadf9] transition-all active:scale-90 duration-200">
+<span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span>
+</button>
+<button class="bg-gradient-to-tr from-[#ffadf9] to-[#ff77ff] text-[#130a1f] rounded-full p-3 active:scale-90 duration-200">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+</button>
+<button class="text-[#d4bbff] p-3 hover:text-[#ffadf9] transition-all active:scale-90 duration-200">
+<span class="material-symbols-outlined" data-icon="person_heart">person_heart</span>
+</button>
+</nav>
+</body></html>
