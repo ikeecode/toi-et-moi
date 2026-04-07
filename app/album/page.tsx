@@ -1,9 +1,9 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, ImageIcon } from 'lucide-react';
+import { ArrowLeft, Images } from 'lucide-react';
 import { BottomNav } from '@/components/custom/bottom-nav';
-import { AlbumGallery } from '@/components/custom/album-gallery';
+import { AlbumPhotoGrid } from '@/components/custom/album-photo-grid';
 
 export default async function AlbumPage() {
   const supabase = await createClient();
@@ -36,60 +36,63 @@ export default async function AlbumPage() {
     redirect('/setup');
   }
 
-  // Check if user has connected Google Photos
-  const { data: tokenRow } = await supabase
-    .from('google_photos_tokens')
-    .select('id')
-    .eq('user_id', user.id)
-    .single();
+  // Fetch all photos from Supabase Storage at album/{couple_id}/
+  const albumPath = `album/${couple.id}`;
+  const { data: files } = await supabase.storage
+    .from('memories')
+    .list(albumPath, {
+      sortBy: { column: 'created_at', order: 'desc' },
+    });
 
-  const isConnected = !!tokenRow;
-  const albumUrl = couple.google_album_url || null;
+  const photos = (files || [])
+    .filter((file) => file.name !== '.emptyFolderPlaceholder')
+    .map((file) => {
+      const {
+        data: { publicUrl },
+      } = supabase.storage
+        .from('memories')
+        .getPublicUrl(`${albumPath}/${file.name}`);
+
+      return {
+        name: file.name,
+        url: publicUrl,
+      };
+    });
 
   return (
-    <div className="min-h-screen bg-[#180f24]">
-      <div className="mx-auto max-w-2xl px-4 py-8 pb-32 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="flex items-center gap-3">
-          <Link
-            href="/dashboard"
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-[#d7c0d1] transition-colors hover:bg-white/10 hover:text-[#ffadf9]"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-[#ecddfb]">
-              Album Photo
-            </h1>
-            <p className="text-xs text-[#d7c0d1]">
-              Google Photos partagé
-            </p>
+    <div className="min-h-screen">
+      <div className="mx-auto max-w-6xl px-4 py-8 pb-40 sm:px-6 lg:px-8">
+        <div className="surface-panel rounded-[2.2rem] p-6 sm:p-8">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div className="flex items-start gap-3">
+              <Link
+                href="/dashboard"
+                className="mt-1 flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-[#d7c0d1] transition-colors hover:bg-white/[0.08] hover:text-[#ffadf9]"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Link>
+
+              <div>
+                <p className="section-kicker">Histoire visuelle</p>
+                <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[#ecddfb]">
+                  Album Photo
+                </h1>
+                <p className="mt-2 max-w-2xl text-sm leading-7 text-[#d7c0d1]">
+                  Une galerie dédiée à vos images les plus importantes, pour que
+                  la partie la plus émotionnelle de votre histoire reste facile à
+                  revoir.
+                </p>
+              </div>
+            </div>
+
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-[#f0e3fb]">
+              <Images className="h-4 w-4 text-[#ffadf9]" />
+              {photos.length} photo{photos.length > 1 ? 's' : ''}
+            </div>
           </div>
         </div>
 
-        {!isConnected ? (
-          /* Connect Google Photos card */
-          <div className="mt-10 flex flex-col items-center rounded-[2rem] bg-white/5 backdrop-blur-[12px] border border-white/[0.08] p-8 text-center">
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-[#ffadf9]/20 to-[#d4bbff]/20">
-              <ImageIcon className="h-10 w-10 text-[#ffadf9]" />
-            </div>
-            <h2 className="mt-6 text-lg font-semibold text-[#ecddfb]">
-              Connectez Google Photos
-            </h2>
-            <p className="mt-2 text-sm text-[#d7c0d1] max-w-xs">
-              Partagez vos plus beaux moments ensemble dans un album commun.
-            </p>
-            <a
-              href="/api/google-photos/connect"
-              className="mt-6 inline-flex items-center gap-2 rounded-full bg-gradient-to-tr from-[#ffadf9] to-[#ff77ff] px-8 py-3 text-sm font-bold text-[#37003a] transition-transform hover:scale-105"
-            >
-              Connecter Google Photos
-            </a>
-          </div>
-        ) : (
-          /* Gallery */
-          <AlbumGallery albumUrl={albumUrl} />
-        )}
+        <AlbumPhotoGrid photos={photos} coupleId={couple.id} />
       </div>
 
       <BottomNav active="memories" />

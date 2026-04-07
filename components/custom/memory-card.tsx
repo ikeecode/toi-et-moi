@@ -49,7 +49,7 @@ export function MemoryCard({ memory, coverPhoto }: MemoryCardProps) {
           <button
             type="submit"
             disabled={deleting}
-            className="flex h-7 w-7 items-center justify-center rounded-full bg-[#180f24]/60 text-[#d7c0d1] opacity-0 backdrop-blur-sm transition-all hover:bg-red-500/30 hover:text-red-400 group-hover:opacity-100"
+            className="flex h-7 w-7 items-center justify-center rounded-full bg-[#180f24]/70 text-[#d7c0d1] opacity-100 backdrop-blur-sm transition-all hover:bg-red-500/30 hover:text-red-400 sm:opacity-0 sm:group-hover:opacity-100"
           >
             <Trash2 className="h-3 w-3" />
             <span className="sr-only">Supprimer le souvenir</span>

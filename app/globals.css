@@ -81,6 +81,8 @@
   --sidebar-accent-foreground: #ecddfb;
   --sidebar-border: rgba(255, 255, 255, 0.08);
   --sidebar-ring: #ffadf9;
+  --page-shadow: 0 24px 80px rgba(7, 3, 13, 0.28);
+  --page-panel: linear-gradient(180deg, rgba(36, 24, 52, 0.92), rgba(23, 14, 35, 0.88));
 }
 
 @layer base {
@@ -89,6 +91,12 @@
   }
   body {
     @apply bg-background text-foreground;
+    background:
+      radial-gradient(circle at top left, rgba(255, 173, 249, 0.12), transparent 32%),
+      radial-gradient(circle at top right, rgba(124, 77, 255, 0.09), transparent 28%),
+      radial-gradient(circle at bottom center, rgba(88, 54, 122, 0.24), transparent 36%),
+      linear-gradient(180deg, #140c20 0%, #12091d 100%);
+    background-attachment: fixed;
   }
   html {
     @apply font-sans;
@@ -110,5 +118,30 @@
   }
   .text-on-primary {
     color: #37003a;
+  }
+  .surface-panel {
+    background: var(--page-panel);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: var(--page-shadow);
+    backdrop-filter: blur(18px);
+  }
+  .surface-panel-soft {
+    background: linear-gradient(180deg, rgba(31, 21, 44, 0.8), rgba(19, 12, 29, 0.78));
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 16px 48px rgba(7, 3, 13, 0.18);
+    backdrop-filter: blur(14px);
+  }
+  .section-kicker {
+    color: rgba(215, 192, 209, 0.78);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+  }
+  .hero-gradient-text {
+    background: linear-gradient(135deg, #ffd4fb 0%, #ffadf9 42%, #d8bfff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 }

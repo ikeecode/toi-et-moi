@@ -1,11 +1,8 @@
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-} from '@/components/ui/card';
+import { buttonVariants } from '@/components/ui/button';
+import { AuthShell } from '@/components/custom/auth-shell';
 import { Mail } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export default async function VerifyPage({
   searchParams,
@@ -15,46 +12,56 @@ export default async function VerifyPage({
   const { email } = await searchParams;
 
   return (
-    <div className="relative flex min-h-dvh items-center justify-center bg-[#130a1f] px-4">
-      {/* Celestial orbs */}
-      <div className="pointer-events-none absolute top-[15%] left-[20%] h-[350px] w-[350px] rounded-full bg-[#ff77ff] opacity-[0.07] blur-[100px]" />
-      <div className="pointer-events-none absolute bottom-[20%] right-[15%] h-[300px] w-[300px] rounded-full bg-[#d4bbff] opacity-[0.06] blur-[100px]" />
+    <AuthShell
+      kicker="Vérification"
+      title="Confirmez votre email pour ouvrir l’espace."
+      description="La création de compte est terminée. Il ne reste qu’une confirmation rapide pour sécuriser votre accès avant la première connexion."
+      highlights={[
+        {
+          title: 'Un accès sécurisé',
+          description: 'La vérification protège votre espace et évite les erreurs d’adresse email.',
+        },
+        {
+          title: 'Une suite claire',
+          description: 'Une fois confirmé, vous pourrez vous connecter et poursuivre la création de votre duo.',
+        },
+        {
+          title: 'Un onboarding propre',
+          description: 'Chaque étape garde un objectif simple pour ne pas casser l’élan.',
+        },
+      ]}
+    >
+      <div className="flex flex-col items-center gap-5 text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-tr from-[#ffadf9]/20 to-[#ff77ff]/20">
+          <Mail className="h-8 w-8 text-[#ffadf9]" />
+        </div>
 
-      <div className="relative z-10 flex w-full max-w-md flex-col items-center">
-        {/* Brand */}
-        <span className="mb-8 text-2xl font-light italic text-[#ffadf9]">
-          Toi et Moi
-        </span>
+        <div className="space-y-2">
+          <h2 className="text-3xl font-semibold tracking-tight text-[#f5e9ff]">
+            Vérifiez votre email
+          </h2>
+          <p className="text-sm leading-relaxed text-[#ccb8de]">
+            Nous avons envoyé un lien de vérification à
+          </p>
+          {email && (
+            <p className="font-medium text-[#ffadf9]">{email}</p>
+          )}
+        </div>
 
-        <Card className="w-full rounded-[2rem] border-white/[0.08] bg-white/5 backdrop-blur-[24px]">
-          <CardHeader className="flex flex-col items-center pb-2 text-center">
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-tr from-[#ffadf9]/20 to-[#ff77ff]/20">
-              <Mail className="h-8 w-8 text-[#ffadf9]" />
-            </div>
-            <h1 className="text-2xl font-bold tracking-tight text-[#ecddfb]">
-              Vérifiez votre email
-            </h1>
-            <p className="mt-1 text-sm text-[#d7c0d1]/70">
-              Nous avons envoyé un lien de vérification à
-            </p>
-            {email && (
-              <p className="mt-1 font-medium text-[#ffadf9]">{email}</p>
-            )}
-          </CardHeader>
-          <CardContent className="flex flex-col items-center gap-4 text-center">
-            <p className="text-sm leading-relaxed text-[#d7c0d1]/50">
-              Cliquez sur le lien dans l&apos;email pour vérifier votre compte, puis revenez vous connecter.
-            </p>
-            <Button
-              size="lg"
-              className="mt-2 w-full rounded-full bg-gradient-to-tr from-[#ffadf9] to-[#ff77ff] font-bold text-[#37003a] shadow-[0_10px_20px_rgba(255,119,255,0.2)] transition-all hover:shadow-[0_14px_28px_rgba(255,119,255,0.3)] hover:brightness-110"
-              render={<Link href="/auth/login" />}
-            >
-              Aller à la connexion
-            </Button>
-          </CardContent>
-        </Card>
+        <p className="max-w-sm text-sm leading-relaxed text-[#bca8cf]">
+          Cliquez sur le lien reçu par email, puis revenez vous connecter pour accéder à votre espace.
+        </p>
+
+        <Link
+          href="/auth/login"
+          className={cn(
+            buttonVariants({ size: 'lg' }),
+            'h-12 w-full rounded-full bg-gradient-to-r from-[#ffadf9] via-[#f793ff] to-[#ff77ff] text-base font-bold text-[#37003a] shadow-[0_16px_40px_rgba(255,119,255,0.22)] hover:-translate-y-0.5 hover:bg-transparent hover:text-[#37003a]'
+          )}
+        >
+          Aller à la connexion
+        </Link>
       </div>
-    </div>
+    </AuthShell>
   );
 }

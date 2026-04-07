@@ -1,11 +1,22 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import Link from 'next/link';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Check } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
-import { markQuestionCompleted } from '@/app/questions/actions';
+import {
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  MessageCircle,
+  Sparkles,
+  UserPlus,
+} from 'lucide-react';
 import { toast } from 'sonner';
+
+import { markQuestionCompleted } from '@/app/questions/actions';
+import { createClient } from '@/lib/supabase/client';
+import { buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import type { Question } from '@/lib/questions';
 
 interface QuestionsCarouselProps {
@@ -13,6 +24,7 @@ interface QuestionsCarouselProps {
   userId: string;
   displayName: string;
   partnerName: string | null;
+  hasPartner: boolean;
   questions: Question[];
   completedIndices: number[];
   lastCompletedBy: string | null;
@@ -21,7 +33,7 @@ interface QuestionsCarouselProps {
 function getInitials(name: string): string {
   return name
     .split(' ')
-    .map((w) => w[0])
+    .map((word) => word[0])
     .join('')
     .toUpperCase()
     .slice(0, 2);
@@ -32,6 +44,7 @@ export function QuestionsCarousel({
   userId,
   displayName,
   partnerName,
+  hasPartner,
   questions,
   completedIndices: initialCompletedIndices,
   lastCompletedBy: initialLastCompletedBy,
@@ -41,38 +54,47 @@ export function QuestionsCarousel({
   const [completedSet, setCompletedSet] = useState<Set<number>>(
     () => new Set(initialCompletedIndices)
   );
-  // Track whose turn it is: the person who did NOT complete the last question
-  const [lastMarkedBy, setLastMarkedBy] = useState<string | null>(initialLastCompletedBy);
+  const [lastMarkedBy, setLastMarkedBy] = useState<string | null>(
+    initialLastCompletedBy
+  );
+  const [direction, setDirection] = useState(0);
 
-  const channelRef = useRef<ReturnType<ReturnType<typeof createClient>['channel']> | null>(null);
+  const channelRef = useRef<
+    ReturnType<ReturnType<typeof createClient>['channel']> | null
+  >(null);
   const partnerWasPresent = useRef(false);
 
-  // Find the first uncompleted question index position
   const initialPosition = useMemo(() => {
-    const idx = questions.findIndex((q) => !initialCompletedIndices.includes(q.index));
-    return idx === -1 ? 0 : idx;
+    const nextQuestionIndex = questions.findIndex(
+      (question) => !initialCompletedIndices.includes(question.index)
+    );
+
+    return nextQuestionIndex === -1 ? 0 : nextQuestionIndex;
   }, [questions, initialCompletedIndices]);
 
   const [currentPosition, setCurrentPosition] = useState(initialPosition);
-  const [direction, setDirection] = useState(0);
-
   const currentQuestion = questions[currentPosition];
   const isCompleted = completedSet.has(currentQuestion.index);
-  const activeSet = currentQuestion.set;
-
-  // Turn logic: it's my turn if the last person to mark was NOT me (or no one marked yet)
   const isMyTurn = lastMarkedBy === null || lastMarkedBy !== userId;
+  const progressPercent = Math.round((completedSet.size / questions.length) * 100);
 
-  // Set up Supabase Realtime channel
   useEffect(() => {
+    if (!hasPartner) {
+      setPartnerPresent(false);
+      setPartnerLeft(false);
+      return;
+    }
+
     const supabase = createClient();
     const channel = supabase.channel(`questions:${coupleId}`);
     channelRef.current = channel;
 
     channel.on('presence', { event: 'sync' }, () => {
       const state = channel.presenceState();
-      const users = Object.values(state).flat() as unknown as Array<{ user_id: string }>;
-      const otherPresent = users.some((u) => u.user_id !== userId);
+      const users = Object.values(state).flat() as unknown as Array<{
+        user_id: string;
+      }>;
+      const otherPresent = users.some((user) => user.user_id !== userId);
 
       if (otherPresent) {
         setPartnerPresent(true);
@@ -81,7 +103,7 @@ export function QuestionsCarousel({
       } else if (partnerWasPresent.current) {
         setPartnerPresent(false);
         setPartnerLeft(true);
-        toast.info('Votre partenaire s\u2019est d\u00e9connect\u00e9(e)');
+        toast.info('Votre partenaire s’est déconnecté(e)');
       } else {
         setPartnerPresent(false);
       }
@@ -89,16 +111,20 @@ export function QuestionsCarousel({
 
     channel.on('broadcast', { event: 'navigate' }, ({ payload }) => {
       if (payload && typeof payload.position === 'number') {
-        setCurrentPosition((prev) => {
-          setDirection(payload.position > prev ? 1 : -1);
+        setCurrentPosition((previousPosition) => {
+          setDirection(payload.position > previousPosition ? 1 : -1);
           return payload.position;
         });
       }
     });
 
     channel.on('broadcast', { event: 'completed' }, ({ payload }) => {
-      if (payload && typeof payload.index === 'number' && typeof payload.by === 'string') {
-        setCompletedSet((prev) => new Set([...prev, payload.index]));
+      if (
+        payload &&
+        typeof payload.index === 'number' &&
+        typeof payload.by === 'string'
+      ) {
+        setCompletedSet((previous) => new Set([...previous, payload.index]));
         setLastMarkedBy(payload.by);
       }
     });
@@ -113,283 +139,287 @@ export function QuestionsCarousel({
       channel.unsubscribe();
       channelRef.current = null;
     };
-  }, [coupleId, userId, displayName]);
+  }, [coupleId, displayName, hasPartner, userId]);
 
-  const goTo = useCallback(
-    (newPosition: number) => {
-      if (newPosition < 0 || newPosition >= questions.length) return;
-      setDirection(newPosition > currentPosition ? 1 : -1);
-      setCurrentPosition(newPosition);
+  function goTo(newPosition: number) {
+    if (newPosition < 0 || newPosition >= questions.length) return;
 
-      channelRef.current?.send({
-        type: 'broadcast',
-        event: 'navigate',
-        payload: { position: newPosition },
-      });
-    },
-    [currentPosition, questions.length]
-  );
+    setDirection(newPosition > currentPosition ? 1 : -1);
+    setCurrentPosition(newPosition);
 
-  const goNext = () => goTo(currentPosition + 1);
-  const goPrev = () => goTo(currentPosition - 1);
+    channelRef.current?.send({
+      type: 'broadcast',
+      event: 'navigate',
+      payload: { position: newPosition },
+    });
+  }
 
-  const handleSetChange = (setNum: number) => {
-    const firstInSet = questions.findIndex((q) => q.set === setNum);
-    if (firstInSet !== -1) {
-      goTo(firstInSet);
-    }
-  };
-
-  const handleMarkCompleted = () => {
-    if (!isMyTurn) return;
+  function handleMarkCompleted() {
+    if (!partnerPresent || !isMyTurn) return;
 
     const index = currentQuestion.index;
 
-    // Optimistic: update UI immediately
-    setCompletedSet((prev) => new Set([...prev, index]));
+    setCompletedSet((previous) => new Set([...previous, index]));
     setLastMarkedBy(userId);
 
-    // Broadcast to partner immediately
     channelRef.current?.send({
       type: 'broadcast',
       event: 'completed',
       payload: { index, by: userId },
     });
 
-    // Sync with DB in background (fire-and-forget)
     markQuestionCompleted(index).catch(() => {
-      // Rollback on error
-      setCompletedSet((prev) => {
-        const next = new Set(prev);
+      setCompletedSet((previous) => {
+        const next = new Set(previous);
         next.delete(index);
         return next;
       });
       setLastMarkedBy(initialLastCompletedBy);
-      toast.error('Erreur lors de l\u2019enregistrement');
+      toast.error('Erreur lors de l’enregistrement');
     });
-  };
+  }
 
   const setLabels: Record<number, string> = {
-    1: 'S\u00e9rie I',
-    2: 'S\u00e9rie II',
-    3: 'S\u00e9rie III',
+    1: 'Série I',
+    2: 'Série II',
+    3: 'Série III',
   };
 
   const setDescriptions: Record<number, string> = {
-    1: 'De plus en plus personnel',
-    2: 'Plus personnel',
-    3: 'Le plus personnel',
+    1: 'Briser la glace sans rester superficiel',
+    2: 'Aller vers des réponses plus personnelles',
+    3: 'Ouvrir les sujets qui demandent de la confiance',
   };
 
-  const variants = {
+  const turnLabel = isMyTurn
+    ? 'À vous de lancer la prochaine question'
+    : `Au tour de ${partnerName ?? 'votre partenaire'}`;
+
+  const connectionLabel = !hasPartner
+    ? 'Invitez votre partenaire pour vivre le rituel à deux'
+    : partnerPresent
+      ? 'En direct, vous pouvez avancer ensemble'
+      : partnerLeft
+        ? 'Votre partenaire est hors ligne pour le moment'
+        : 'Votre partenaire n’est pas connecté en ce moment';
+
+  const questionVariants = {
     enter: (dir: number) => ({
-      x: dir > 0 ? 300 : -300,
+      x: dir > 0 ? 120 : -120,
       opacity: 0,
+      scale: 0.98,
     }),
     center: {
       x: 0,
       opacity: 1,
+      scale: 1,
     },
     exit: (dir: number) => ({
-      x: dir > 0 ? -300 : 300,
+      x: dir > 0 ? -120 : 120,
       opacity: 0,
+      scale: 0.98,
     }),
   };
 
-  const completedCount = completedSet.size;
-
-  // Whose turn label
-  const turnName = isMyTurn ? displayName : (partnerName ?? 'Partenaire');
-
-  // Waiting state
-  if (!partnerPresent) {
-    return (
-      <div className="space-y-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-        >
-          <div className="rounded-[2rem] bg-white/5 backdrop-blur-[20px] border border-white/5 shadow-[inset_2px_2px_10px_rgba(255,173,249,0.1)] p-8 sm:p-12">
-            <div className="flex flex-col items-center gap-6">
-              <div className="flex items-center -space-x-4">
-                <div className="relative z-10 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-[#ffadf9] to-[#ff77ff] text-lg font-bold text-[#37003a] border-4 border-[#180f24]">
+  return (
+    <div className="space-y-5">
+      <div className="surface-panel rounded-[2rem] p-5 sm:p-6">
+        <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex -space-x-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full border-4 border-[#180f24] bg-gradient-to-br from-[#ffadf9] to-[#ff77ff] text-sm font-bold text-[#37003a]">
                   {getInitials(displayName)}
                 </div>
-                <motion.div
-                  animate={{ opacity: [0.4, 1, 0.4] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-                  className="flex h-16 w-16 items-center justify-center rounded-full bg-[#2f263c] text-lg font-bold text-[#d7c0d1] border-4 border-[#180f24]"
-                >
+                <div className="flex h-12 w-12 items-center justify-center rounded-full border-4 border-[#180f24] bg-gradient-to-br from-[#d4bbff] to-[#ffadf9] text-sm font-bold text-[#37003a]">
                   {partnerName ? getInitials(partnerName) : '?'}
-                </motion.div>
+                </div>
               </div>
 
-              <div className="text-center">
-                <motion.p
-                  animate={{ opacity: [1, 0.5, 1] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-                  className="text-lg font-medium text-[#ecddfb]/80"
-                >
-                  {`En attente de ${partnerName ?? 'votre partenaire'}...`}
-                </motion.p>
-                {partnerLeft && (
-                  <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="mt-2 text-sm text-[#d7c0d1]"
-                  >
-                    {'Votre partenaire s\u2019est d\u00e9connect\u00e9(e)'}
-                  </motion.p>
-                )}
+              <div>
+                <p className="text-sm font-semibold text-[#f4e8ff]">
+                  {hasPartner
+                    ? `${displayName} & ${partnerName ?? 'votre partenaire'}`
+                    : 'Un rituel prêt à être partagé'}
+                </p>
+                <p className="mt-1 text-sm text-[#baa6cd]">{connectionLabel}</p>
               </div>
+            </div>
 
-              <p className="text-sm text-[#d7c0d1]">
-                {`${completedCount} sur 36 compl\u00e9t\u00e9es`}
-              </p>
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-[#f0e3fb]">
+              <Sparkles className="h-4 w-4 text-[#ffadf9]" />
+              {turnLabel}
             </div>
           </div>
-        </motion.div>
-      </div>
-    );
-  }
 
-  // Playing state
-  return (
-    <div className="space-y-6">
-      {/* Online indicators */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-center gap-3"
-      >
-        <div className="flex items-center gap-2">
-          <div className="relative flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#ffadf9] to-[#ff77ff] text-xs font-bold text-[#37003a]">
-            {getInitials(displayName)}
-            <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-[#ffadf9] shadow-[0_0_8px_#ffadf9] ring-2 ring-[#180f24]" />
-          </div>
-          <div className="relative flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#d4bbff] to-[#ffadf9] text-xs font-bold text-[#37003a]">
-            {partnerName ? getInitials(partnerName) : '?'}
-            <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-[#ffadf9] shadow-[0_0_8px_#ffadf9] ring-2 ring-[#180f24]" />
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-3 text-sm">
+              <span className="text-[#f3e7ff]">
+                {completedSet.size} question(s) complétée(s)
+              </span>
+              <span className="text-[#baa6cd]">{progressPercent}% du parcours</span>
+            </div>
+            <div className="h-2 rounded-full bg-white/[0.06]">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-[#ffadf9] via-[#f793ff] to-[#ff77ff]"
+                style={{ width: `${Math.max(progressPercent, 4)}%` }}
+              />
+            </div>
           </div>
         </div>
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#ffadf9]/10 border border-[#ffadf9]/20 px-3 py-1 text-xs font-medium text-[#ffadf9]">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#ffadf9] shadow-[0_0_6px_#ffadf9]" />
-          {'Connect\u00e9s'}
-        </span>
-      </motion.div>
+      </div>
 
-      {/* Progress + Turn indicator */}
-      <div className="flex flex-col items-center gap-1">
-        <p className="text-center text-xs text-[#d7c0d1]">
-          {`${completedCount} sur 36 compl\u00e9t\u00e9es`}
-        </p>
-        <p className="text-center text-xs font-medium text-[#ffadf9]">
-          {`C\u2019est au tour de ${turnName}`}
+      {!partnerPresent && (
+        <div className="surface-panel-soft rounded-[1.8rem] p-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-semibold text-[#f4e8ff]">
+                {hasPartner
+                  ? 'Le rituel reste visible, même si vous ne répondez pas en même temps.'
+                  : 'Invitez votre partenaire pour débloquer les validations à deux.'}
+              </p>
+              <p className="mt-2 text-sm leading-7 text-[#baa6cd]">
+                {hasPartner
+                  ? 'Vous pouvez déjà lire, préparer et parcourir les prochaines questions. La validation se fera une fois réunis.'
+                  : 'Le parcours est prêt: partagez votre lien d’invitation depuis l’espace duo pour commencer ensemble.'}
+              </p>
+            </div>
+
+            {!hasPartner && (
+              <Link
+                href="/invite"
+                className={cn(
+                  buttonVariants({ size: 'lg' }),
+                  'h-11 rounded-full bg-gradient-to-r from-[#ffadf9] via-[#f793ff] to-[#ff77ff] px-5 text-sm font-bold text-[#37003a] hover:bg-transparent hover:text-[#37003a]'
+                )}
+              >
+                <UserPlus className="h-4 w-4" />
+                Inviter
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="inline-flex rounded-full border border-white/10 bg-white/[0.04] p-1">
+          {[1, 2, 3].map((set) => (
+            <button
+              key={set}
+              onClick={() => {
+                const firstInSet = questions.findIndex((question) => question.set === set);
+                if (firstInSet !== -1) goTo(firstInSet);
+              }}
+              className={cn(
+                'rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] transition-colors',
+                currentQuestion.set === set
+                  ? 'bg-[#ffadf9] text-[#37003a]'
+                  : 'text-[#cdb8de] hover:text-[#fff0ff]'
+              )}
+            >
+              {setLabels[set]}
+            </button>
+          ))}
+        </div>
+
+        <p className="text-sm text-[#baa6cd]">
+          {setDescriptions[currentQuestion.set]}
         </p>
       </div>
 
-      {/* Set Tabs */}
-      <div className="flex items-center justify-center gap-6">
-        {[1, 2, 3].map((set) => (
-          <button
-            key={set}
-            onClick={() => handleSetChange(set)}
-            className={`font-['Inter'] text-xs uppercase tracking-widest pb-2 transition-colors ${
-              activeSet === set
-                ? 'text-[#ffadf9] border-b-2 border-[#ffadf9]'
-                : 'text-[#d7c0d1] hover:text-[#ffadf9]'
-            }`}
-          >
-            {setLabels[set]}
-          </button>
-        ))}
-      </div>
-
-      <p className="text-center text-xs text-[#d7c0d1]">
-        {setDescriptions[activeSet]}
-      </p>
-
-      {/* Question Card */}
-      <div className="relative min-h-[320px] overflow-hidden">
+      <div className="relative min-h-[24rem] overflow-hidden">
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
             key={currentQuestion.index}
             custom={direction}
-            variants={variants}
+            variants={questionVariants}
             initial="enter"
             animate="center"
             exit="exit"
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
+            transition={{ duration: 0.28, ease: 'easeInOut' }}
             className="absolute inset-0"
           >
-            <div className="flex h-full flex-col rounded-[2rem] bg-white/5 backdrop-blur-[20px] border border-white/5 shadow-[inset_2px_2px_10px_rgba(255,173,249,0.1)]">
-              <div className="flex flex-1 flex-col items-center justify-between gap-6 p-6 sm:p-8">
-                {/* Top: Question number + set */}
-                <div className="flex w-full items-center justify-between">
-                  <span className="text-sm font-medium text-[#d7c0d1]">
-                    {`Question ${currentQuestion.index} sur 36`}
-                  </span>
-                  <span className="inline-flex rounded-full bg-[#d4bbff]/10 border border-[#d4bbff]/20 px-3 py-1 text-xs font-medium text-[#d4bbff]">
-                    {setLabels[currentQuestion.set]}
-                  </span>
+            <div className="surface-panel flex h-full flex-col rounded-[2.2rem] p-6 sm:p-8">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="section-kicker">Question actuelle</p>
+                  <p className="mt-2 text-sm font-medium text-[#f0e3fb]">
+                    Question {currentQuestion.index} sur {questions.length}
+                  </p>
                 </div>
+                <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold text-[#e8d9f6]">
+                  {setLabels[currentQuestion.set]}
+                </span>
+              </div>
 
-                {/* Center: Question text */}
-                <p className="text-center text-lg font-medium leading-relaxed text-[#ecddfb]/90 sm:text-xl">
+              <div className="flex flex-1 items-center">
+                <p className="text-pretty text-2xl font-semibold leading-relaxed tracking-tight text-[#f8efff] sm:text-3xl">
                   {currentQuestion.text}
                 </p>
+              </div>
 
-                {/* Bottom: Status/Action */}
-                <div className="flex w-full flex-col items-center gap-2">
-                  {isCompleted ? (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-[#ffadf9]/10 border border-[#ffadf9]/20 px-4 py-2 text-sm font-medium text-[#ffadf9]">
-                      <Check className="h-3.5 w-3.5" />
-                      {'Discut\u00e9'}
-                    </span>
-                  ) : isMyTurn ? (
-                    <button
-                      onClick={handleMarkCompleted}
-                      className="rounded-full bg-gradient-to-tr from-[#ffadf9] to-[#ff77ff] px-6 py-3 text-sm font-bold text-[#37003a] transition-all active:scale-95 hover:shadow-[0_10px_30px_rgba(255,173,249,0.2)]"
-                    >
-                      {'Marquer comme discut\u00e9'}
-                    </button>
-                  ) : (
-                    <div className="flex flex-col items-center gap-1.5">
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-[#d4bbff]/10 border border-[#d4bbff]/20 px-4 py-2 text-sm font-medium text-[#d4bbff]">
-                        {`C\u2019est au tour de ${partnerName ?? 'votre partenaire'}`}
-                      </span>
-                      <span className="text-xs text-[#d7c0d1]/60">
-                        {'Attendez que votre partenaire valide'}
-                      </span>
+              <div className="mt-8 space-y-3">
+                {isCompleted ? (
+                  <div className="inline-flex items-center gap-2 rounded-full border border-[#ffadf9]/20 bg-[#ffadf9]/10 px-4 py-2 text-sm font-medium text-[#ffbdf8]">
+                    <Check className="h-4 w-4" />
+                    Question déjà discutée
+                  </div>
+                ) : partnerPresent && isMyTurn ? (
+                  <button
+                    onClick={handleMarkCompleted}
+                    className="inline-flex h-12 items-center justify-center rounded-full bg-gradient-to-r from-[#ffadf9] via-[#f793ff] to-[#ff77ff] px-6 text-sm font-bold text-[#37003a] shadow-[0_16px_40px_rgba(255,119,255,0.22)] transition-all hover:-translate-y-0.5"
+                  >
+                    Marquer comme discutée
+                  </button>
+                ) : (
+                  <div className="rounded-[1.5rem] border border-white/8 bg-black/10 px-4 py-4">
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#ffadf9]/10 text-[#ffadf9]">
+                        <MessageCircle className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-[#f4e8ff]">
+                          {partnerPresent
+                            ? `Attendez la validation de ${partnerName ?? 'votre partenaire'}.`
+                            : hasPartner
+                              ? 'Gardez cette question pour votre prochain moment ensemble.'
+                              : 'Invitez votre partenaire pour activer la validation à deux.'}
+                        </p>
+                        <p className="mt-1 text-sm leading-7 text-[#baa6cd]">
+                          {partnerPresent
+                            ? 'Le tour alterne pour garder la conversation équilibrée.'
+                            : hasPartner
+                              ? 'Vous pouvez déjà parcourir les cartes, mais la progression se valide lorsque vous êtes réunis.'
+                              : 'Le reste du parcours prendra tout son sens dès que vous partagerez votre espace.'}
+                        </p>
+                      </div>
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>
         </AnimatePresence>
       </div>
 
-      {/* Navigation */}
       <div className="flex items-center justify-between">
         <button
-          onClick={goPrev}
+          onClick={() => goTo(currentPosition - 1)}
           disabled={currentPosition === 0}
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-[#524250]/20 text-[#ffadf9] transition-colors hover:bg-white/5 disabled:opacity-30"
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-[#f0e3fb] transition-colors hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-35"
         >
           <ChevronLeft className="h-4 w-4" />
-          <span className="sr-only">{'Question pr\u00e9c\u00e9dente'}</span>
+          <span className="sr-only">Question précédente</span>
         </button>
 
-        <span className="text-sm text-[#d7c0d1]">
+        <div className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-[#e7d8f5]">
           {currentPosition + 1} / {questions.length}
-        </span>
+        </div>
 
         <button
-          onClick={goNext}
+          onClick={() => goTo(currentPosition + 1)}
           disabled={currentPosition === questions.length - 1}
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-[#524250]/20 text-[#ffadf9] transition-colors hover:bg-white/5 disabled:opacity-30"
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-[#f0e3fb] transition-colors hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-35"
         >
           <ChevronRight className="h-4 w-4" />
           <span className="sr-only">Question suivante</span>
