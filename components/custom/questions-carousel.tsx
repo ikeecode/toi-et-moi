@@ -109,6 +109,27 @@ export function QuestionsCarousel({
   const [lastMarkedBy, setLastMarkedBy] = useState<string | null>(
     initialLastCompletedBy
   );
+
+  // Sync completed state when server props change (e.g. after revalidatePath or page revisit)
+  useEffect(() => {
+    const serverSet = new Set<string>([
+      ...completedBuiltinIndices.map(builtinKey),
+      ...completedCustomIds.map(customKey),
+    ]);
+    setCompletedSet((prev) => {
+      // Merge: keep anything the server knows about + anything added locally via Realtime
+      const merged = new Set(prev);
+      for (const key of serverSet) merged.add(key);
+      if (merged.size !== prev.size) return merged;
+      return prev;
+    });
+  }, [completedBuiltinIndices, completedCustomIds]);
+
+  useEffect(() => {
+    if (initialLastCompletedBy != null) {
+      setLastMarkedBy(initialLastCompletedBy);
+    }
+  }, [initialLastCompletedBy]);
   const [direction, setDirection] = useState(0);
   const [newQuestionText, setNewQuestionText] = useState('');
   const [isAddPending, startAddTransition] = useTransition();

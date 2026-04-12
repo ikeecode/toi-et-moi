@@ -1,12 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { Home, Sparkles, Calendar, Heart } from 'lucide-react';
+import { Home, Sparkles, Calendar, Heart, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
   { key: 'dashboard', href: '/dashboard', icon: Home, label: 'Accueil' },
   { key: 'questions', href: '/questions', icon: Sparkles, label: 'Rituel' },
+  { key: 'rules', href: '/rules', icon: ShieldCheck, label: 'Règles' },
   { key: 'calendar', href: '/calendar', icon: Calendar, label: 'Agenda' },
   { key: 'memories', href: '/memories', icon: Heart, label: 'Histoire' },
 ] as const;
@@ -17,7 +18,7 @@ export function BottomNav({ active }: { active: NavKey }) {
   return (
     <nav className="fixed inset-x-0 bottom-4 z-50 px-3 sm:px-4">
       <div className="mx-auto w-full max-w-lg overflow-hidden rounded-[2rem] border border-white/10 bg-[#170f24]/88 p-1.5 shadow-[0_28px_80px_rgba(7,3,13,0.4)] backdrop-blur-2xl">
-        <div className="grid grid-cols-4 gap-1.5">
+        <div className="grid grid-cols-5 gap-1.5">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = active === item.key;

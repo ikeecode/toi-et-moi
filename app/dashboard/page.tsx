@@ -7,6 +7,7 @@ import {
   Heart,
   LogOut,
   MessageCircle,
+  ShieldCheck,
   Sparkles,
   UserPlus,
 } from 'lucide-react';
@@ -190,6 +191,14 @@ export default async function DashboardPage() {
       icon: Calendar,
       metric: nextEvent ? nextEvent.title : 'Planifier une prochaine date',
       accent: 'from-[#d4bbff]/20 to-[#ffadf9]/18',
+    },
+    {
+      href: '/rules',
+      title: 'Règlements',
+      description: 'Vos règles de vie à deux, validées ensemble',
+      icon: ShieldCheck,
+      metric: 'Charte du couple',
+      accent: 'from-emerald-400/20 to-[#d4bbff]/20',
     },
     {
       href: '/album',
