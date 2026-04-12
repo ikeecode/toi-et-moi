@@ -1,11 +1,11 @@
-const CACHE_NAME = 'toi-et-moi-v1';
+const CACHE_VERSION = 2;
+const CACHE_NAME = `toi-et-moi-v${CACHE_VERSION}`;
 const PRECACHE_URLS = ['/', '/dashboard', '/questions', '/memories', '/calendar'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS))
   );
-  self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
@@ -28,4 +28,10 @@ self.addEventListener('fetch', (event) => {
       })
       .catch(() => caches.match(event.request))
   );
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
+import { SwRegister } from "@/components/custom/sw-register";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -37,6 +38,7 @@ export default function RootLayout({
     >
       <body className="flex min-h-full flex-col overflow-x-hidden bg-background text-foreground selection:bg-[#ffadf9]/30 selection:text-[#fff6ff]">
         {children}
+        <SwRegister />
         <Toaster
           position="top-center"
           toastOptions={{
