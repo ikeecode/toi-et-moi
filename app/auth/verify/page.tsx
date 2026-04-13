@@ -1,8 +1,6 @@
 import Link from 'next/link';
-import { buttonVariants } from '@/components/ui/button';
 import { AuthShell } from '@/components/custom/auth-shell';
 import { Mail } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 export default async function VerifyPage({
   searchParams,
@@ -32,33 +30,28 @@ export default async function VerifyPage({
       ]}
     >
       <div className="flex flex-col items-center gap-5 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-tr from-[#ffadf9]/20 to-[#ff77ff]/20">
-          <Mail className="h-8 w-8 text-[#ffadf9]" />
+        <div className="icon-chip h-16 w-16 rounded-[1.5rem]">
+          <Mail className="h-7 w-7" />
         </div>
 
         <div className="space-y-2">
-          <h2 className="text-3xl font-semibold tracking-tight text-[#f5e9ff]">
+          <h2 className="text-3xl font-semibold tracking-tight text-foreground">
             Vérifiez votre email
           </h2>
-          <p className="text-sm leading-relaxed text-[#ccb8de]">
+          <p className="text-sm leading-relaxed text-muted-foreground">
             Nous avons envoyé un lien de vérification à
           </p>
           {email && (
-            <p className="font-medium text-[#ffadf9]">{email}</p>
+            <p className="font-medium text-[#dbe7ff]">{email}</p>
           )}
         </div>
 
-        <p className="max-w-sm text-sm leading-relaxed text-[#bca8cf]">
-          Cliquez sur le lien reçu par email, puis revenez vous connecter pour accéder à votre espace.
+        <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
+          Cliquez sur le lien reçu par email, puis revenez vous connecter pour
+          accéder à votre espace.
         </p>
 
-        <Link
-          href="/auth/login"
-          className={cn(
-            buttonVariants({ size: 'lg' }),
-            'h-12 w-full rounded-full bg-gradient-to-r from-[#ffadf9] via-[#f793ff] to-[#ff77ff] text-base font-bold text-[#37003a] shadow-[0_16px_40px_rgba(255,119,255,0.22)] hover:-translate-y-0.5 hover:bg-transparent hover:text-[#37003a]'
-          )}
-        >
+        <Link href="/auth/login" className="cta-primary w-full">
           Aller à la connexion
         </Link>
       </div>

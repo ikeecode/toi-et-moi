@@ -13,6 +13,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Heart } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface NicknameDialogProps {
   partnerId: string;
@@ -35,8 +36,11 @@ export function NicknameDialog({
     try {
       await updateNickname(formData);
       setOpen(false);
-    } catch {
-      // ignore
+      toast.success('Petit nom mis à jour.');
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : 'Impossible de mettre à jour le petit nom.'
+      );
     } finally {
       setLoading(false);
     }
@@ -49,20 +53,17 @@ export function NicknameDialog({
       >
         {children}
       </DialogTrigger>
-      <DialogContent className="rounded-[2rem] border-white/[0.08] bg-[#21172d] backdrop-blur-[24px] sm:max-w-sm">
+      <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle className="text-[#ecddfb]">Petit nom</DialogTitle>
-          <DialogDescription className="text-[#d7c0d1]">
+          <DialogTitle>Petit nom</DialogTitle>
+          <DialogDescription>
             Choisissez un surnom pour {partnerDisplayName}
           </DialogDescription>
         </DialogHeader>
         <form action={handleSubmit} className="flex flex-col gap-4">
           <input type="hidden" name="partnerId" value={partnerId} />
           <div className="flex flex-col gap-2">
-            <Label
-              htmlFor="nickname"
-              className="font-['Inter'] text-xs uppercase tracking-widest text-[#d7c0d1]"
-            >
+            <Label htmlFor="nickname" className="form-label">
               Surnom
             </Label>
             <Input
@@ -71,16 +72,16 @@ export function NicknameDialog({
               type="text"
               defaultValue={currentNickname ?? ''}
               placeholder="Mon cœur, Bébé, Chéri(e)..."
-              className="rounded-xl border-white/10 bg-[#3a3047]/40 text-[#ecddfb] placeholder:text-[#d7c0d1]/40 focus:border-[#ffadf9]/30"
+              className="text-foreground placeholder:text-muted-foreground"
             />
-            <p className="text-xs text-[#d7c0d1]/60">
+            <p className="text-xs text-muted-foreground">
               Laissez vide pour utiliser le prénom
             </p>
           </div>
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-full bg-gradient-to-tr from-[#ffadf9] to-[#ff77ff] py-3 text-sm font-bold text-[#37003a] transition-all active:scale-95 disabled:opacity-50"
+            className="cta-primary w-full"
           >
             {loading ? (
               'Enregistrement...'

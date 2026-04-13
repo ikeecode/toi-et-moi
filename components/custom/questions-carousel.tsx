@@ -10,17 +10,8 @@ import {
   useTransition,
   type FormEvent,
 } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import {
-  Check,
-  ChevronLeft,
-  ChevronRight,
-  MessageCircle,
-  Plus,
-  Sparkles,
-  Trash2,
-  UserPlus,
-} from 'lucide-react';
+import { AnimatePresence, motion, type PanInfo } from 'framer-motion';
+import { Check, ChevronLeft, ChevronRight, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import {
@@ -30,7 +21,6 @@ import {
   markCustomQuestionCompleted,
 } from '@/app/questions/actions';
 import { createClient } from '@/lib/supabase/client';
-import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { Question } from '@/lib/questions';
 
@@ -72,15 +62,7 @@ type DisplayQuestion =
 
 const builtinKey = (i: number) => `builtin:${i}`;
 const customKey = (id: string) => `custom:${id}`;
-
-function getInitials(name: string): string {
-  return name
-    .split(' ')
-    .map((word) => word[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
-}
+const SWIPE_THRESHOLD = 80;
 
 export function QuestionsCarousel({
   coupleId,
@@ -109,27 +91,6 @@ export function QuestionsCarousel({
   const [lastMarkedBy, setLastMarkedBy] = useState<string | null>(
     initialLastCompletedBy
   );
-
-  // Sync completed state when server props change (e.g. after revalidatePath or page revisit)
-  useEffect(() => {
-    const serverSet = new Set<string>([
-      ...completedBuiltinIndices.map(builtinKey),
-      ...completedCustomIds.map(customKey),
-    ]);
-    setCompletedSet((prev) => {
-      // Merge: keep anything the server knows about + anything added locally via Realtime
-      const merged = new Set(prev);
-      for (const key of serverSet) merged.add(key);
-      if (merged.size !== prev.size) return merged;
-      return prev;
-    });
-  }, [completedBuiltinIndices, completedCustomIds]);
-
-  useEffect(() => {
-    if (initialLastCompletedBy != null) {
-      setLastMarkedBy(initialLastCompletedBy);
-    }
-  }, [initialLastCompletedBy]);
   const [direction, setDirection] = useState(0);
   const [newQuestionText, setNewQuestionText] = useState('');
   const [isAddPending, startAddTransition] = useTransition();
@@ -147,6 +108,7 @@ export function QuestionsCarousel({
       text: q.text,
       builtinIndex: q.index,
     }));
+
     const custom: DisplayQuestion[] = customQuestions.map((q) => ({
       key: customKey(q.id),
       kind: 'custom',
@@ -155,49 +117,37 @@ export function QuestionsCarousel({
       customId: q.id,
       createdBy: q.createdBy,
     }));
+
     return [...builtin, ...custom];
   }, [builtinQuestions, customQuestions]);
 
-  const initialPosition = useMemo(() => {
-    const next = questions.findIndex((q) => !completedSet.has(q.key));
-    return next === -1 ? 0 : next;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const [currentPosition, setCurrentPosition] = useState(() => {
+    const initiallyCompleted = new Set<string>([
+      ...completedBuiltinIndices.map(builtinKey),
+      ...completedCustomIds.map(customKey),
+    ]);
 
-  const [currentPosition, setCurrentPosition] = useState(initialPosition);
+    const builtinIndex = builtinQuestions.findIndex(
+      (question) => !initiallyCompleted.has(builtinKey(question.index))
+    );
 
-  const safePosition = Math.min(currentPosition, Math.max(0, questions.length - 1));
-  const currentQuestion = questions[safePosition];
-  const isCompleted = currentQuestion ? completedSet.has(currentQuestion.key) : false;
-  const isMyTurn = lastMarkedBy === null || lastMarkedBy !== userId;
-  const progressPercent =
-    questions.length === 0
-      ? 0
-      : Math.round((completedSet.size / questions.length) * 100);
+    if (builtinIndex !== -1) {
+      return builtinIndex;
+    }
 
-  const goTo = useCallback(
-    (newPosition: number) => {
-      if (newPosition < 0 || newPosition >= questions.length) return;
-      setDirection((prev) => {
-        void prev;
-        return newPosition > currentPosition ? 1 : -1;
-      });
-      setCurrentPosition(newPosition);
-      channelRef.current?.send({
-        type: 'broadcast',
-        event: 'navigate',
-        payload: { position: newPosition },
-      });
-    },
-    [currentPosition, questions.length]
-  );
+    const customIndex = initialCustomQuestions.findIndex(
+      (question) => !initiallyCompleted.has(customKey(question.id))
+    );
+
+    if (customIndex !== -1) {
+      return builtinQuestions.length + customIndex;
+    }
+
+    return 0;
+  });
 
   useEffect(() => {
-    if (!hasPartner) {
-      setPartnerPresent(false);
-      setPartnerLeft(false);
-      return;
-    }
+    if (!hasPartner) return;
 
     const supabase = createClient();
     const channel = supabase.channel(`questions:${coupleId}`);
@@ -217,7 +167,7 @@ export function QuestionsCarousel({
       } else if (partnerWasPresent.current) {
         setPartnerPresent(false);
         setPartnerLeft(true);
-        toast.info('Votre partenaire s’est déconnecté(e)');
+        toast.info('Votre partenaire est hors ligne.');
       } else {
         setPartnerPresent(false);
       }
@@ -247,16 +197,23 @@ export function QuestionsCarousel({
         typeof payload.createdBy === 'string'
       ) {
         setCustomQuestions((prev) =>
-          prev.some((q) => q.id === payload.id)
+          prev.some((question) => question.id === payload.id)
             ? prev
-            : [...prev, { id: payload.id, text: payload.text, createdBy: payload.createdBy }]
+            : [
+                ...prev,
+                {
+                  id: payload.id,
+                  text: payload.text,
+                  createdBy: payload.createdBy,
+                },
+              ]
         );
       }
     });
 
     channel.on('broadcast', { event: 'custom:deleted' }, ({ payload }) => {
       if (payload && typeof payload.id === 'string') {
-        setCustomQuestions((prev) => prev.filter((q) => q.id !== payload.id));
+        setCustomQuestions((prev) => prev.filter((question) => question.id !== payload.id));
         setCompletedSet((prev) => {
           const next = new Set(prev);
           next.delete(customKey(payload.id));
@@ -277,8 +234,81 @@ export function QuestionsCarousel({
     };
   }, [coupleId, displayName, hasPartner, userId]);
 
+  const showingCustomComposer =
+    currentPosition === questions.length && customQuestions.length === 0;
+  const safePosition = Math.min(currentPosition, Math.max(0, questions.length - 1));
+  const currentQuestion = showingCustomComposer ? undefined : questions[safePosition];
+  const isCompleted = currentQuestion ? completedSet.has(currentQuestion.key) : false;
+  const isMyTurn = lastMarkedBy === null || lastMarkedBy !== userId;
+  const effectivePartnerPresent = hasPartner && partnerPresent;
+  const effectivePartnerLeft = hasPartner && partnerLeft;
+  const canComplete =
+    !!currentQuestion && !isCompleted && effectivePartnerPresent && isMyTurn;
+  const isOnCustomSet = currentQuestion?.set === 4 || showingCustomComposer;
+  const progressPercent =
+    questions.length === 0
+      ? 0
+      : Math.round((completedSet.size / questions.length) * 100);
+
+  const statusLabel = !hasPartner
+    ? 'Invitation'
+    : effectivePartnerPresent
+      ? isMyTurn
+        ? 'À vous'
+        : `Tour de ${partnerName ?? '...'}` 
+      : effectivePartnerLeft
+        ? 'Hors ligne'
+        : 'En attente';
+
+  const questionVariants = {
+    enter: (dir: number) => ({
+      x: dir > 0 ? 48 : -48,
+      opacity: 0,
+      scale: 0.985,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+      scale: 1,
+    },
+    exit: (dir: number) => ({
+      x: dir > 0 ? -48 : 48,
+      opacity: 0,
+      scale: 0.985,
+    }),
+  };
+
+  const goTo = useCallback(
+    (newPosition: number) => {
+      if (newPosition < 0 || newPosition >= questions.length) return;
+
+      setDirection(newPosition > currentPosition ? 1 : -1);
+      setCurrentPosition(newPosition);
+      channelRef.current?.send({
+        type: 'broadcast',
+        event: 'navigate',
+        payload: { position: newPosition },
+      });
+    },
+    [currentPosition, questions.length]
+  );
+
+  function openCustomComposer() {
+    setDirection(1);
+    setCurrentPosition(questions.length);
+  }
+
+  function handleSwipeEnd(_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) {
+    if (showingCustomComposer) return;
+    if (info.offset.x <= -SWIPE_THRESHOLD) {
+      goTo(safePosition + 1);
+    } else if (info.offset.x >= SWIPE_THRESHOLD) {
+      goTo(safePosition - 1);
+    }
+  }
+
   function handleMarkCompleted() {
-    if (!currentQuestion || !partnerPresent || !isMyTurn) return;
+    if (!currentQuestion || !canComplete) return;
 
     const key = currentQuestion.key;
 
@@ -303,7 +333,7 @@ export function QuestionsCarousel({
         return next;
       });
       setLastMarkedBy(initialLastCompletedBy);
-      toast.error('Erreur lors de l’enregistrement');
+      toast.error("Impossible d'enregistrer cette question.");
     });
   }
 
@@ -323,19 +353,26 @@ export function QuestionsCarousel({
           text: created.text,
           createdBy: created.created_by,
         };
+
         setCustomQuestions((prev) =>
-          prev.some((q) => q.id === createdQuestion.id) ? prev : [...prev, createdQuestion]
+          prev.some((question) => question.id === createdQuestion.id)
+            ? prev
+            : [...prev, createdQuestion]
         );
         setNewQuestionText('');
+        setDirection(1);
+        setCurrentPosition(questions.length);
+
         channelRef.current?.send({
           type: 'broadcast',
           event: 'custom:added',
           payload: createdQuestion,
         });
-        toast.success('Question ajoutée');
+
+        toast.success('Question ajoutée.');
       } catch (error) {
         toast.error(
-          error instanceof Error ? error.message : 'Impossible d’ajouter la question.'
+          error instanceof Error ? error.message : "Impossible d'ajouter la question."
         );
       }
     });
@@ -343,12 +380,18 @@ export function QuestionsCarousel({
 
   function handleDeleteCustom(id: string) {
     const previous = customQuestions;
-    setCustomQuestions((prev) => prev.filter((q) => q.id !== id));
+    const nextWillBeEmpty = customQuestions.length === 1;
+
+    setCustomQuestions((prev) => prev.filter((question) => question.id !== id));
     setCompletedSet((prev) => {
       const next = new Set(prev);
       next.delete(customKey(id));
       return next;
     });
+    setCurrentPosition((prev) =>
+      nextWillBeEmpty ? questions.length - 1 : Math.min(prev, questions.length - 2)
+    );
+
     channelRef.current?.send({
       type: 'broadcast',
       event: 'custom:deleted',
@@ -362,152 +405,38 @@ export function QuestionsCarousel({
   }
 
   const setLabels: Record<1 | 2 | 3 | 4, string> = {
-    1: 'Série I',
-    2: 'Série II',
-    3: 'Série III',
-    4: 'Vos questions',
+    1: 'I',
+    2: 'II',
+    3: 'III',
+    4: '+',
   };
-
-  const setDescriptions: Record<1 | 2 | 3 | 4, string> = {
-    1: 'Briser la glace sans rester superficiel',
-    2: 'Aller vers des réponses plus personnelles',
-    3: 'Ouvrir les sujets qui demandent de la confiance',
-    4: 'Les questions que vous avez envie de poser à deux',
-  };
-
-  const turnLabel = isMyTurn
-    ? 'À vous de lancer la prochaine question'
-    : `Au tour de ${partnerName ?? 'votre partenaire'}`;
-
-  const connectionLabel = !hasPartner
-    ? 'Invitez votre partenaire pour vivre le rituel à deux'
-    : partnerPresent
-      ? 'En direct, vous pouvez avancer ensemble'
-      : partnerLeft
-        ? 'Votre partenaire est hors ligne pour le moment'
-        : 'Votre partenaire n’est pas connecté en ce moment';
-
-  const questionVariants = {
-    enter: (dir: number) => ({
-      x: dir > 0 ? 120 : -120,
-      opacity: 0,
-      scale: 0.98,
-    }),
-    center: {
-      x: 0,
-      opacity: 1,
-      scale: 1,
-    },
-    exit: (dir: number) => ({
-      x: dir > 0 ? -120 : 120,
-      opacity: 0,
-      scale: 0.98,
-    }),
-  };
-
-  const isOnCustomSet = currentQuestion?.set === 4;
-  const hasCustomQuestions = customQuestions.length > 0;
 
   return (
-    <div className="space-y-5">
-      <div className="surface-panel rounded-[2rem] p-5 sm:p-6">
-        <div className="flex flex-col gap-5">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex -space-x-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full border-4 border-[#180f24] bg-gradient-to-br from-[#ffadf9] to-[#ff77ff] text-sm font-bold text-[#37003a]">
-                  {getInitials(displayName)}
-                </div>
-                <div className="flex h-12 w-12 items-center justify-center rounded-full border-4 border-[#180f24] bg-gradient-to-br from-[#d4bbff] to-[#ffadf9] text-sm font-bold text-[#37003a]">
-                  {partnerName ? getInitials(partnerName) : '?'}
-                </div>
-              </div>
-
-              <div>
-                <p className="text-sm font-semibold text-[#f4e8ff]">
-                  {hasPartner
-                    ? `${displayName} & ${partnerName ?? 'votre partenaire'}`
-                    : 'Un rituel prêt à être partagé'}
-                </p>
-                <p className="mt-1 text-sm text-[#baa6cd]">{connectionLabel}</p>
-              </div>
-            </div>
-
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-[#f0e3fb]">
-              <Sparkles className="h-4 w-4 text-[#ffadf9]" />
-              {turnLabel}
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <div className="flex items-center justify-between gap-3 text-sm">
-              <span className="text-[#f3e7ff]">
-                {completedSet.size} question(s) complétée(s)
-              </span>
-              <span className="text-[#baa6cd]">{progressPercent}% du parcours</span>
-            </div>
-            <div className="h-2 rounded-full bg-white/[0.06]">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-[#ffadf9] via-[#f793ff] to-[#ff77ff]"
-                style={{ width: `${Math.max(progressPercent, 4)}%` }}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {!partnerPresent && (
-        <div className="surface-panel-soft rounded-[1.8rem] p-5">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm font-semibold text-[#f4e8ff]">
-                {hasPartner
-                  ? 'Le rituel reste visible, même si vous ne répondez pas en même temps.'
-                  : 'Invitez votre partenaire pour débloquer les validations à deux.'}
-              </p>
-              <p className="mt-2 text-sm leading-7 text-[#baa6cd]">
-                {hasPartner
-                  ? 'Vous pouvez déjà lire, préparer et parcourir les prochaines questions. La validation se fera une fois réunis.'
-                  : 'Le parcours est prêt: partagez votre lien d’invitation depuis l’espace duo pour commencer ensemble.'}
-              </p>
-            </div>
-
-            {!hasPartner && (
-              <Link
-                href="/invite"
-                className={cn(
-                  buttonVariants({ size: 'lg' }),
-                  'h-11 rounded-full bg-gradient-to-r from-[#ffadf9] via-[#f793ff] to-[#ff77ff] px-5 text-sm font-bold text-[#37003a] hover:bg-transparent hover:text-[#37003a]'
-                )}
-              >
-                <UserPlus className="h-4 w-4" />
-                Inviter
-              </Link>
-            )}
-          </div>
-        </div>
-      )}
-
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="inline-flex flex-wrap rounded-full border border-white/10 bg-white/[0.04] p-1">
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <div className="inline-flex rounded-[1rem] border border-white/10 bg-white/[0.03] p-1">
           {[1, 2, 3, 4].map((set) => (
             <button
               key={set}
+              type="button"
               onClick={() => {
-                const firstInSet = questions.findIndex((q) => q.set === set);
+                const firstInSet = questions.findIndex((question) => question.set === set);
+
                 if (firstInSet !== -1) {
                   goTo(firstInSet);
-                } else if (set === 4) {
-                  setDirection(1);
-                  setCurrentPosition(questions.length);
+                  return;
+                }
+
+                if (set === 4) {
+                  openCustomComposer();
                 }
               }}
               className={cn(
-                'rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] transition-colors',
-                currentQuestion?.set === set ||
-                  (set === 4 && !hasCustomQuestions && isOnCustomSet)
-                  ? 'bg-[#ffadf9] text-[#37003a]'
-                  : 'text-[#cdb8de] hover:text-[#fff0ff]'
+                'flex h-9 min-w-11 items-center justify-center rounded-[0.8rem] px-3 text-sm font-semibold transition-colors',
+                (currentQuestion?.set === set && !showingCustomComposer) ||
+                  (set === 4 && showingCustomComposer)
+                  ? 'bg-white text-[#0b0d12]'
+                  : 'text-muted-foreground'
               )}
             >
               {setLabels[set as 1 | 2 | 3 | 4]}
@@ -515,38 +444,64 @@ export function QuestionsCarousel({
           ))}
         </div>
 
-        <p className="text-sm text-[#baa6cd]">
-          {currentQuestion
-            ? setDescriptions[currentQuestion.set]
-            : setDescriptions[4]}
-        </p>
+        <span
+          className={cn(
+            'soft-chip min-w-[5.6rem] justify-center',
+            effectivePartnerPresent && isMyTurn && 'text-[#dbe7ff]',
+            !hasPartner && 'text-amber-100',
+            !effectivePartnerPresent && hasPartner && 'text-muted-foreground'
+          )}
+        >
+          {statusLabel}
+        </span>
       </div>
 
-      {isOnCustomSet || !hasCustomQuestions ? (
+      <div className="space-y-2">
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
+          <span>
+            {completedSet.size}/{questions.length || 0}
+          </span>
+          <span>
+            {showingCustomComposer
+              ? 'Vos questions'
+              : questions.length === 0
+                ? '0'
+                : `${safePosition + 1}`}
+          </span>
+        </div>
+        <div className="h-1.5 rounded-full bg-white/[0.06]">
+          <div
+            className="h-full rounded-full bg-[linear-gradient(90deg,#a7bfff,#7ea0ff)]"
+            style={{ width: `${Math.max(progressPercent, questions.length ? 5 : 0)}%` }}
+          />
+        </div>
+      </div>
+
+      {isOnCustomSet ? (
         <form
           onSubmit={handleAddCustomQuestion}
-          className="surface-panel-soft flex flex-col gap-3 rounded-[1.8rem] p-4 sm:flex-row sm:items-center"
+          className="flex items-center gap-2 rounded-[1.2rem] border border-white/10 bg-white/[0.03] p-2"
         >
           <input
             type="text"
             value={newQuestionText}
             onChange={(event) => setNewQuestionText(event.target.value)}
-            placeholder="Ajoutez une question que vous voulez vous poser…"
+            placeholder="Ajouter une question"
             maxLength={500}
-            className="flex-1 rounded-full border border-white/10 bg-black/20 px-5 py-3 text-sm text-[#f4e8ff] placeholder:text-[#8c7aa0] focus:border-[#ffadf9]/50 focus:outline-none"
+            className="h-11 flex-1 rounded-[0.95rem] bg-transparent px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
           />
           <button
             type="submit"
             disabled={isAddPending || newQuestionText.trim().length < 3}
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#ffadf9] via-[#f793ff] to-[#ff77ff] px-5 text-sm font-bold text-[#37003a] shadow-[0_16px_40px_rgba(255,119,255,0.22)] transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex h-11 w-11 items-center justify-center rounded-[0.95rem] bg-[#8fb2ff] text-[#09111f] disabled:opacity-40"
           >
             <Plus className="h-4 w-4" />
-            {isAddPending ? 'Ajout…' : 'Ajouter'}
+            <span className="sr-only">Ajouter la question</span>
           </button>
         </form>
       ) : null}
 
-      <div className="relative min-h-[24rem] overflow-hidden">
+      <div className="relative min-h-[62svh]">
         <AnimatePresence mode="wait" custom={direction}>
           {currentQuestion ? (
             <motion.div
@@ -556,98 +511,80 @@ export function QuestionsCarousel({
               initial="enter"
               animate="center"
               exit="exit"
-              transition={{ duration: 0.28, ease: 'easeInOut' }}
+              transition={{ duration: 0.24, ease: 'easeOut' }}
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.08}
+              onDragEnd={handleSwipeEnd}
+              style={{ touchAction: 'pan-y' }}
               className="absolute inset-0"
             >
-              <div className="surface-panel flex h-full flex-col rounded-[2.2rem] p-6 sm:p-8">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="section-kicker">Question actuelle</p>
-                    <p className="mt-2 text-sm font-medium text-[#f0e3fb]">
-                      Question {safePosition + 1} sur {questions.length}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold text-[#e8d9f6]">
-                      {setLabels[currentQuestion.set]}
-                    </span>
-                    {currentQuestion.kind === 'custom' && (
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteCustom(currentQuestion.customId)}
-                        className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-[#e8d9f6] transition-colors hover:border-red-300/40 hover:text-red-200"
-                        aria-label="Supprimer cette question"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    )}
-                  </div>
+              <div className="surface-panel flex h-full flex-col rounded-[2rem] px-6 py-5 sm:px-8 sm:py-7">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="soft-chip">{setLabels[currentQuestion.set]}</span>
+                  {currentQuestion.kind === 'custom' ? (
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteCustom(currentQuestion.customId)}
+                      className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-foreground transition-colors hover:border-red-300/40 hover:text-red-200"
+                      aria-label="Supprimer cette question"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  ) : null}
                 </div>
 
-                <div className="flex flex-1 items-center">
-                  <p className="text-pretty text-2xl font-semibold leading-relaxed tracking-tight text-[#f8efff] sm:text-3xl">
+                <div className="flex flex-1 items-center justify-center py-8">
+                  <p className="max-w-2xl text-center text-[1.95rem] font-semibold leading-[1.22] tracking-tight text-foreground sm:text-[2.55rem]">
                     {currentQuestion.text}
                   </p>
                 </div>
 
-                <div className="mt-8 space-y-3">
+                <div className="flex items-center justify-center">
                   {isCompleted ? (
-                    <div className="inline-flex items-center gap-2 rounded-full border border-[#ffadf9]/20 bg-[#ffadf9]/10 px-4 py-2 text-sm font-medium text-[#ffbdf8]">
+                    <span className="soft-chip border-[#8fb2ff]/20 bg-[#8fb2ff]/12 text-[#dbe7ff]">
                       <Check className="h-4 w-4" />
-                      Question déjà discutée
-                    </div>
-                  ) : partnerPresent && isMyTurn ? (
+                      Discutée
+                    </span>
+                  ) : canComplete ? (
                     <button
+                      type="button"
                       onClick={handleMarkCompleted}
-                      className="inline-flex h-12 items-center justify-center rounded-full bg-gradient-to-r from-[#ffadf9] via-[#f793ff] to-[#ff77ff] px-6 text-sm font-bold text-[#37003a] shadow-[0_16px_40px_rgba(255,119,255,0.22)] transition-all hover:-translate-y-0.5"
+                      className="cta-primary h-12 px-6"
                     >
-                      Marquer comme discutée
+                      Marquer
                     </button>
+                  ) : !hasPartner ? (
+                    <Link href="/invite" className="cta-secondary">
+                      Inviter
+                    </Link>
                   ) : (
-                    <div className="rounded-[1.5rem] border border-white/8 bg-black/10 px-4 py-4">
-                      <div className="flex items-start gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#ffadf9]/10 text-[#ffadf9]">
-                          <MessageCircle className="h-4 w-4" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-[#f4e8ff]">
-                            {partnerPresent
-                              ? `Attendez la validation de ${partnerName ?? 'votre partenaire'}.`
-                              : hasPartner
-                                ? 'Gardez cette question pour votre prochain moment ensemble.'
-                                : 'Invitez votre partenaire pour activer la validation à deux.'}
-                          </p>
-                          <p className="mt-1 text-sm leading-7 text-[#baa6cd]">
-                            {partnerPresent
-                              ? 'Le tour alterne pour garder la conversation équilibrée.'
-                              : hasPartner
-                                ? 'Vous pouvez déjà parcourir les cartes, mais la progression se valide lorsque vous êtes réunis.'
-                                : 'Le reste du parcours prendra tout son sens dès que vous partagerez votre espace.'}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+                    <span className="soft-chip">
+                      {effectivePartnerPresent
+                        ? `Tour de ${partnerName ?? '...'}`
+                        : 'Disponible hors ligne'}
+                    </span>
                   )}
                 </div>
               </div>
             </motion.div>
           ) : (
             <motion.div
-              key="empty-custom"
+              key="custom-composer"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="absolute inset-0"
             >
-              <div className="surface-panel flex h-full flex-col items-center justify-center rounded-[2.2rem] p-8 text-center">
-                <p className="section-kicker">Vos questions</p>
-                <p className="mt-3 text-xl font-semibold text-[#f8efff]">
-                  Ajoutez votre première question
+              <div className="surface-panel flex h-full flex-col items-center justify-center rounded-[2rem] px-6 py-8 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/[0.06]">
+                  <Plus className="h-5 w-5 text-foreground" />
+                </div>
+                <p className="mt-5 text-xl font-semibold text-foreground">
+                  Vos questions
                 </p>
-                <p className="mt-2 max-w-md text-sm leading-7 text-[#baa6cd]">
-                  Utilisez le champ ci-dessus pour créer une question qui n&apos;existe
-                  pas encore dans le rituel. Elle apparaîtra ici et comptera dans
-                  votre progression.
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Ajoutez-en une puis glissez pour continuer.
                 </p>
               </div>
             </motion.div>
@@ -655,24 +592,34 @@ export function QuestionsCarousel({
         </AnimatePresence>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <button
+          type="button"
           onClick={() => goTo(safePosition - 1)}
-          disabled={safePosition === 0 || questions.length === 0}
-          className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-[#f0e3fb] transition-colors hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-35"
+          disabled={safePosition === 0 || questions.length === 0 || showingCustomComposer}
+          className="cta-secondary h-11 w-11 rounded-full px-0 disabled:opacity-35"
         >
           <ChevronLeft className="h-4 w-4" />
           <span className="sr-only">Question précédente</span>
         </button>
 
-        <div className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-[#e7d8f5]">
-          {questions.length === 0 ? '0 / 0' : `${safePosition + 1} / ${questions.length}`}
-        </div>
+        <span className="soft-chip min-w-[5.6rem] justify-center text-[0.78rem]">
+          {showingCustomComposer
+            ? 'Ajouter'
+            : questions.length === 0
+              ? '0 / 0'
+              : `${safePosition + 1} / ${questions.length}`}
+        </span>
 
         <button
+          type="button"
           onClick={() => goTo(safePosition + 1)}
-          disabled={safePosition >= questions.length - 1 || questions.length === 0}
-          className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-[#f0e3fb] transition-colors hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-35"
+          disabled={
+            safePosition >= questions.length - 1 ||
+            questions.length === 0 ||
+            showingCustomComposer
+          }
+          className="cta-secondary h-11 w-11 rounded-full px-0 disabled:opacity-35"
         >
           <ChevronRight className="h-4 w-4" />
           <span className="sr-only">Question suivante</span>

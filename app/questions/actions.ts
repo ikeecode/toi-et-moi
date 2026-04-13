@@ -11,7 +11,7 @@ async function getCurrentCouple() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error('Not authenticated');
+    throw new Error('Vous devez être connecté.');
   }
 
   const { data: coupleMember } = await supabase
@@ -21,7 +21,7 @@ async function getCurrentCouple() {
     .single();
 
   if (!coupleMember) {
-    throw new Error('No couple found');
+    throw new Error('Aucun espace couple trouvé.');
   }
 
   return { supabase, user, coupleId: coupleMember.couple_id as string };
@@ -37,7 +37,7 @@ export async function markBuiltinQuestionCompleted(questionIndex: number) {
   });
 
   if (error && error.code !== '23505') {
-    throw new Error('Failed to mark question as completed');
+    throw new Error("Impossible d'enregistrer cette question.");
   }
 
   revalidatePath('/questions');
@@ -53,7 +53,7 @@ export async function markCustomQuestionCompleted(customQuestionId: string) {
   });
 
   if (error && error.code !== '23505') {
-    throw new Error('Failed to mark question as completed');
+    throw new Error("Impossible d'enregistrer cette question.");
   }
 
   revalidatePath('/questions');

@@ -11,7 +11,7 @@ export async function createMemory(formData: FormData) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) throw new Error('Not authenticated');
+  if (!user) throw new Error('Vous devez être connecté pour ajouter un souvenir.');
 
   const { data: coupleMember } = await supabase
     .from('couple_members')
@@ -19,7 +19,7 @@ export async function createMemory(formData: FormData) {
     .eq('user_id', user.id)
     .single();
 
-  if (!coupleMember) throw new Error('No couple found');
+  if (!coupleMember) throw new Error('Aucun espace couple trouvé.');
 
   const title = formData.get('title') as string;
   const description = formData.get('description') as string;
@@ -28,7 +28,7 @@ export async function createMemory(formData: FormData) {
     (image) => image && image.size > 0
   );
 
-  if (!title || !date) throw new Error('Title and date are required');
+  if (!title || !date) throw new Error('Le titre et la date sont requis.');
 
   const validationError = validateImageUpload(images);
   if (validationError) throw new Error(validationError);
@@ -45,7 +45,9 @@ export async function createMemory(formData: FormData) {
     .select()
     .single();
 
-  if (memoryError || !memory) throw new Error('Failed to create memory');
+  if (memoryError || !memory) {
+    throw new Error('Impossible de créer ce souvenir.');
+  }
 
   for (const image of images) {
     const fileExt = image.name.split('.').pop();
@@ -81,7 +83,9 @@ export async function updateMemory(formData: FormData) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) throw new Error('Not authenticated');
+  if (!user) {
+    throw new Error('Vous devez être connecté pour modifier un souvenir.');
+  }
 
   const memoryId = formData.get('memoryId') as string;
   const title = formData.get('title') as string;
@@ -93,7 +97,7 @@ export async function updateMemory(formData: FormData) {
   );
 
   if (!memoryId || !title || !date)
-    throw new Error('Title and date are required');
+    throw new Error('Le titre et la date sont requis.');
 
   const { data: coupleMember } = await supabase
     .from('couple_members')
@@ -101,7 +105,7 @@ export async function updateMemory(formData: FormData) {
     .eq('user_id', user.id)
     .single();
 
-  if (!coupleMember) throw new Error('No couple found');
+  if (!coupleMember) throw new Error('Aucun espace couple trouvé.');
 
   const { data: memory } = await supabase
     .from('memories')
@@ -110,7 +114,7 @@ export async function updateMemory(formData: FormData) {
     .eq('couple_id', coupleMember.couple_id)
     .single();
 
-  if (!memory) throw new Error('Memory not found');
+  if (!memory) throw new Error('Souvenir introuvable.');
 
   await supabase
     .from('memories')
@@ -181,10 +185,12 @@ export async function deleteMemory(formData: FormData) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) throw new Error('Not authenticated');
+  if (!user) {
+    throw new Error('Vous devez être connecté pour supprimer un souvenir.');
+  }
 
   const memoryId = formData.get('memoryId') as string;
-  if (!memoryId) throw new Error('Memory ID is required');
+  if (!memoryId) throw new Error("L'identifiant du souvenir est requis.");
 
   const { data: coupleMember } = await supabase
     .from('couple_members')
@@ -192,7 +198,7 @@ export async function deleteMemory(formData: FormData) {
     .eq('user_id', user.id)
     .single();
 
-  if (!coupleMember) throw new Error('No couple found');
+  if (!coupleMember) throw new Error('Aucun espace couple trouvé.');
 
   const { data: memory } = await supabase
     .from('memories')
@@ -201,7 +207,7 @@ export async function deleteMemory(formData: FormData) {
     .eq('couple_id', coupleMember.couple_id)
     .single();
 
-  if (!memory) throw new Error('Memory not found');
+  if (!memory) throw new Error('Souvenir introuvable.');
 
   // Delete photos from storage
   const storagePath = `${coupleMember.couple_id}/${memoryId}`;

@@ -2,8 +2,9 @@
 
 import { deleteEvent } from '@/app/calendar/actions';
 import { formatEventDate } from '@/lib/helpers';
-import { Trash2, Heart, Star, Gift, CalendarDays } from 'lucide-react';
+import { Trash2, Heart, Star, Gift, CalendarDays, LoaderCircle } from 'lucide-react';
 import { format } from 'date-fns';
+import { useFormStatus } from 'react-dom';
 
 type Event = {
   id: string;
@@ -17,13 +18,13 @@ const typeConfig: Record<
   { dotColor: string; glowColor: string; icon: typeof Heart }
 > = {
   date: {
-    dotColor: 'bg-[#ffadf9]',
-    glowColor: 'shadow-[0_0_8px_#ffadf9]',
+    dotColor: 'bg-[#8fb2ff]',
+    glowColor: 'shadow-[0_0_8px_#8fb2ff]',
     icon: Heart,
   },
   anniversary: {
-    dotColor: 'bg-[#d4bbff]',
-    glowColor: 'shadow-[0_0_8px_#d4bbff]',
+    dotColor: 'bg-[#b8c9ff]',
+    glowColor: 'shadow-[0_0_8px_#b8c9ff]',
     icon: Star,
   },
   birthday: {
@@ -48,12 +49,33 @@ function groupByMonth(events: Event[]): Record<string, Event[]> {
   return groups;
 }
 
+function DeleteEventButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-red-500/10 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-50"
+    >
+      {pending ? (
+        <LoaderCircle className="h-3.5 w-3.5 animate-spin" />
+      ) : (
+        <Trash2 className="h-3.5 w-3.5" />
+      )}
+      <span className="sr-only">Supprimer</span>
+    </button>
+  );
+}
+
 export function EventList({ events }: { events: Event[] }) {
   if (events.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
-        <CalendarDays className="h-12 w-12 text-[#d7c0d1]/40" />
-        <p className="mt-4 text-sm text-[#d7c0d1]">
+        <div className="icon-chip h-14 w-14 rounded-[1.3rem]">
+          <CalendarDays className="h-6 w-6" />
+        </div>
+        <p className="mt-4 text-sm text-muted-foreground">
           Aucun événement. Ajoutez votre première date spéciale !
         </p>
       </div>
@@ -66,7 +88,7 @@ export function EventList({ events }: { events: Event[] }) {
     <div className="space-y-8">
       {Object.entries(grouped).map(([month, monthEvents]) => (
         <div key={month}>
-          <h2 className="mb-4 font-['Inter'] text-xs uppercase tracking-widest text-[#d7c0d1]">
+          <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
             {month}
           </h2>
           <div className="space-y-3">
@@ -76,31 +98,25 @@ export function EventList({ events }: { events: Event[] }) {
               return (
                 <div
                   key={event.id}
-                  className="flex items-center gap-4 rounded-[2rem] bg-white/5 backdrop-blur-[12px] border border-white/[0.08] px-5 py-4 transition-all duration-200 hover:bg-white/[0.08]"
+                  className="flex items-center gap-4 rounded-[1.5rem] border border-white/[0.08] bg-white/[0.03] px-5 py-4 backdrop-blur-[12px] transition-all duration-200 hover:bg-white/[0.06]"
                 >
                   <div className="flex items-center gap-3">
                     <span
                       className={`h-2.5 w-2.5 shrink-0 rounded-full ${config.dotColor} ${config.glowColor}`}
                     />
-                    <Icon className="h-4 w-4 text-[#d7c0d1]" />
+                    <Icon className="h-4 w-4 text-[#dbe7ff]" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-[#ecddfb]">
+                    <p className="truncate text-sm font-medium text-foreground">
                       {event.title}
                     </p>
-                    <p className="text-xs text-[#d7c0d1]">
+                    <p className="text-xs text-muted-foreground">
                       {formatEventDate(event.date)}
                     </p>
                   </div>
                   <form action={deleteEvent}>
                     <input type="hidden" name="eventId" value={event.id} />
-                    <button
-                      type="submit"
-                      className="flex h-8 w-8 items-center justify-center rounded-full text-[#d7c0d1]/60 transition-colors hover:bg-red-500/10 hover:text-red-400"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                      <span className="sr-only">Supprimer</span>
-                    </button>
+                    <DeleteEventButton />
                   </form>
                 </div>
               );

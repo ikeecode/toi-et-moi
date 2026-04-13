@@ -13,7 +13,7 @@ export async function createCoupleSpace(formData: FormData) {
   } = await supabase.auth.getUser();
 
   if (userError || !user) {
-    redirect('/auth/login?error=You must be logged in to create a couple space.');
+    redirect('/auth/login?error=Vous devez être connecté pour créer un espace couple.');
   }
 
   const coupleName = (formData.get('couple_name') as string) || null;
@@ -30,12 +30,12 @@ export async function createCoupleSpace(formData: FormData) {
 
   if (coupleError || !couple) {
     redirect(
-      `/setup?error=${encodeURIComponent(coupleError?.message ?? 'Failed to create couple space.')}`
+      `/setup?error=${encodeURIComponent(coupleError?.message ?? "Impossible de créer l'espace couple.")}`
     );
   }
 
   const displayName =
-    user.user_metadata?.display_name || user.email?.split('@')[0] || 'You';
+    user.user_metadata?.display_name || user.email?.split('@')[0] || 'Vous';
 
   const { error: memberError } = await supabase.from('couple_members').insert({
     couple_id: couple.id,

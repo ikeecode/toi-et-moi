@@ -92,18 +92,18 @@ function RuleCard({
   return (
     <div
       className={cn(
-        'surface-panel-soft rounded-[1.8rem] p-5 transition-all',
+        'surface-panel-soft rounded-[1.6rem] p-5 transition-all',
         isPending && 'pointer-events-none opacity-50'
       )}
     >
       <div className="flex items-start justify-between gap-3">
-        <p className="flex-1 text-base font-semibold leading-relaxed text-[#f4e8ff]">
+        <p className="flex-1 text-base font-semibold leading-relaxed text-foreground">
           {rule.text}
         </p>
         <button
           type="button"
           onClick={handleDelete}
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-[#e8d9f6] transition-colors hover:border-red-300/40 hover:text-red-200"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-foreground transition-colors hover:border-red-300/40 hover:text-red-200"
           aria-label="Supprimer cette règle"
         >
           <Trash2 className="h-3.5 w-3.5" />
@@ -121,7 +121,7 @@ function RuleCard({
           {config.label}
         </span>
 
-        <span className="text-xs text-[#9f8aae]">
+        <span className="text-xs text-muted-foreground">
           {isProposer ? 'Proposée par vous' : `Proposée par ${partnerName ?? 'votre partenaire'}`}
         </span>
       </div>
@@ -139,7 +139,7 @@ function RuleCard({
           <button
             onClick={handleReject}
             disabled={isPending}
-            className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-medium text-[#e8d9f6] transition-colors hover:bg-white/[0.08]"
+            className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-white/[0.08]"
           >
             <X className="h-4 w-4" />
             Refuser
@@ -153,12 +153,12 @@ function RuleCard({
 export function RuleList({ rules, userId, partnerName }: RuleListProps) {
   if (rules.length === 0) {
     return (
-      <div className="surface-panel-soft flex flex-col items-center justify-center rounded-[1.8rem] px-6 py-12 text-center">
-        <ShieldCheck className="h-10 w-10 text-[#ffadf9]/40" />
-        <p className="mt-4 text-lg font-semibold text-[#f5e9ff]">
+      <div className="surface-panel-soft flex flex-col items-center justify-center rounded-[1.6rem] px-6 py-12 text-center">
+        <ShieldCheck className="h-10 w-10 text-[#8fb2ff]/55" />
+        <p className="mt-4 text-lg font-semibold text-foreground">
           Aucune règle pour l&apos;instant
         </p>
-        <p className="mt-2 max-w-sm text-sm leading-7 text-[#baa6cd]">
+        <p className="mt-2 max-w-sm text-sm leading-7 text-muted-foreground">
           Proposez une première règle et votre partenaire pourra l&apos;approuver ou
           la refuser. Les règles approuvées forment votre charte de couple.
         </p>

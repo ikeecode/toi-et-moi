@@ -14,6 +14,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
+import { Textarea } from '@/components/ui/textarea';
 
 export function ProposeRuleDialog() {
   const [open, setOpen] = useState(false);
@@ -37,28 +38,25 @@ export function ProposeRuleDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <button className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-tr from-[#ffadf9] to-[#ff77ff] px-5 py-2.5 text-sm font-bold text-[#37003a] transition-shadow hover:shadow-[0_10px_30px_rgba(255,173,249,0.2)]">
+          <button className="cta-primary px-5 py-2.5">
             <Plus className="h-4 w-4" />
             Proposer
           </button>
         }
       />
-      <DialogContent className="border-white/[0.08] bg-[#21172d] sm:rounded-[2rem]">
+      <DialogContent>
         <DialogHeader>
-          <DialogTitle className="text-[#ecddfb]">Proposer une règle</DialogTitle>
-          <DialogDescription className="text-[#d7c0d1]">
+          <DialogTitle>Proposer une règle</DialogTitle>
+          <DialogDescription>
             Votre partenaire devra approuver cette règle pour qu&apos;elle soit validée.
           </DialogDescription>
         </DialogHeader>
         <form action={handleSubmit} className="grid gap-4">
           <div className="grid gap-2">
-            <Label
-              htmlFor="text"
-              className="font-['Inter'] text-xs uppercase tracking-widest text-[#d7c0d1]"
-            >
+            <Label htmlFor="text" className="form-label">
               Règle
             </Label>
-            <textarea
+            <Textarea
               id="text"
               name="text"
               placeholder="Ex: Toujours se dire bonne nuit avant de dormir"
@@ -66,14 +64,14 @@ export function ProposeRuleDialog() {
               minLength={3}
               maxLength={500}
               rows={3}
-              className="w-full rounded-xl border border-white/[0.08] bg-[#2f263c] px-4 py-3 text-sm text-[#ecddfb] placeholder:text-[#d7c0d1]/50 focus:border-[#ffadf9]/40 focus:outline-none"
+              className="min-h-28 text-foreground placeholder:text-muted-foreground"
             />
           </div>
           <DialogFooter>
             <button
               type="submit"
               disabled={isPending}
-              className="inline-flex w-full items-center justify-center rounded-full bg-gradient-to-tr from-[#ffadf9] to-[#ff77ff] px-5 py-3 text-sm font-bold text-[#37003a] transition-shadow hover:shadow-[0_10px_30px_rgba(255,173,249,0.2)] disabled:opacity-50"
+              className="cta-primary w-full disabled:opacity-50"
             >
               {isPending ? 'Envoi...' : 'Proposer cette règle'}
             </button>

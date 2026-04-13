@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#1a1025",
+  themeColor: "#0b0d12",
   width: "device-width",
   initialScale: 1,
 };
@@ -36,16 +36,17 @@ export default function RootLayout({
       lang="fr"
       className={`${geistSans.variable} ${geistMono.variable} h-full overflow-x-hidden antialiased`}
     >
-      <body className="flex min-h-full flex-col overflow-x-hidden bg-background text-foreground selection:bg-[#ffadf9]/30 selection:text-[#fff6ff]">
+      <body className="flex min-h-full flex-col overflow-x-hidden bg-background text-foreground">
         {children}
         <SwRegister />
         <Toaster
           position="top-center"
           toastOptions={{
             style: {
-              background: "#21172d",
-              border: "1px solid rgba(255, 255, 255, 0.08)",
-              color: "#ecddfb",
+              background: "rgba(23, 28, 37, 0.96)",
+              border: "1px solid rgba(245, 247, 251, 0.12)",
+              color: "#f5f7fb",
+              boxShadow: "0 18px 48px rgba(0, 0, 0, 0.32)",
             },
           }}
         />

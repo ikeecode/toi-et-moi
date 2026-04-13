@@ -114,6 +114,9 @@ export function EditMemoryDialog({ memory, photos }: EditMemoryDialogProps) {
     if (!nextOpen) {
       setRemovedPhotoIds(new Set());
       setNewPreviews([]);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   }
 
@@ -121,27 +124,22 @@ export function EditMemoryDialog({ memory, photos }: EditMemoryDialogProps) {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger
         render={
-          <button className="flex h-7 w-7 items-center justify-center rounded-full bg-[#180f24]/70 text-[#d7c0d1] opacity-100 backdrop-blur-sm transition-all hover:bg-[#ffadf9]/30 hover:text-[#fff0ff] sm:opacity-0 sm:group-hover:opacity-100">
+          <button className="flex h-8 w-8 items-center justify-center rounded-full bg-[#0d1118]/75 text-foreground opacity-100 backdrop-blur-sm transition-all hover:bg-[#8fb2ff]/24 hover:text-white sm:opacity-0 sm:group-hover:opacity-100">
             <Pencil className="h-3 w-3" />
             <span className="sr-only">Modifier le souvenir</span>
           </button>
         }
       />
-      <DialogContent className="max-h-[90vh] overflow-y-auto border-white/[0.08] bg-[#21172d] sm:max-w-md sm:rounded-[2rem]">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-[#ecddfb]">
-            Modifier le souvenir
-          </DialogTitle>
-          <DialogDescription className="text-[#d7c0d1]">
+          <DialogTitle>Modifier le souvenir</DialogTitle>
+          <DialogDescription>
             Mettez à jour les détails ou les photos de ce moment.
           </DialogDescription>
         </DialogHeader>
         <form action={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
-            <Label
-              htmlFor="edit-title"
-              className="font-['Inter'] text-xs uppercase tracking-widest text-[#d7c0d1]"
-            >
+            <Label htmlFor="edit-title" className="form-label">
               Titre
             </Label>
             <Input
@@ -149,15 +147,12 @@ export function EditMemoryDialog({ memory, photos }: EditMemoryDialogProps) {
               name="title"
               defaultValue={memory.title}
               required
-              className="rounded-xl border-white/[0.08] bg-[#2f263c] text-[#ecddfb] placeholder:text-[#d7c0d1]/50 focus:border-[#ffadf9]/40"
+              className="text-foreground placeholder:text-muted-foreground"
             />
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label
-              htmlFor="edit-description"
-              className="font-['Inter'] text-xs uppercase tracking-widest text-[#d7c0d1]"
-            >
+            <Label htmlFor="edit-description" className="form-label">
               Description
             </Label>
             <Textarea
@@ -165,15 +160,12 @@ export function EditMemoryDialog({ memory, photos }: EditMemoryDialogProps) {
               name="description"
               defaultValue={memory.description ?? ''}
               rows={3}
-              className="rounded-xl border-white/[0.08] bg-[#2f263c] text-[#ecddfb] placeholder:text-[#d7c0d1]/50 focus:border-[#ffadf9]/40"
+              className="min-h-28 text-foreground placeholder:text-muted-foreground"
             />
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label
-              htmlFor="edit-date"
-              className="font-['Inter'] text-xs uppercase tracking-widest text-[#d7c0d1]"
-            >
+            <Label htmlFor="edit-date" className="form-label">
               Date
             </Label>
             <Input
@@ -182,13 +174,13 @@ export function EditMemoryDialog({ memory, photos }: EditMemoryDialogProps) {
               type="date"
               defaultValue={memory.date}
               required
-              className="rounded-xl border-white/[0.08] bg-[#2f263c] text-[#ecddfb] focus:border-[#ffadf9]/40"
+              className="text-foreground"
             />
           </div>
 
           {visiblePhotos.length > 0 && (
             <div className="flex flex-col gap-2">
-              <Label className="font-['Inter'] text-xs uppercase tracking-widest text-[#d7c0d1]">
+              <Label className="form-label">
                 Photos existantes
               </Label>
               <div className="flex flex-wrap gap-2">
@@ -213,18 +205,18 @@ export function EditMemoryDialog({ memory, photos }: EditMemoryDialogProps) {
           )}
 
           <div className="flex flex-col gap-2">
-            <Label className="font-['Inter'] text-xs uppercase tracking-widest text-[#d7c0d1]">
+            <Label className="form-label">
               Ajouter des photos
             </Label>
             <div
-              className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-3xl border-2 border-dashed border-[#524250]/40 bg-[#3a3047]/10 p-6 transition-colors hover:border-[#ffadf9]/30"
+              className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-[1.6rem] border-2 border-dashed border-white/12 bg-white/[0.03] p-6 transition-colors hover:border-[#8fb2ff]/40"
               onClick={() => fileInputRef.current?.click()}
             >
-              <ImageIcon className="h-6 w-6 text-[#d7c0d1]/60" />
-              <span className="text-xs text-[#d7c0d1]">
+              <ImageIcon className="h-6 w-6 text-muted-foreground" />
+              <span className="text-xs text-foreground">
                 Cliquez pour ajouter des photos
               </span>
-              <span className="text-center text-[11px] leading-5 text-[#a995bd]">
+              <span className="text-center text-[11px] leading-5 text-muted-foreground">
                 {getImageUploadHint()}
               </span>
             </div>
@@ -239,7 +231,7 @@ export function EditMemoryDialog({ memory, photos }: EditMemoryDialogProps) {
           </div>
 
           {newPreviews.length > 0 && (
-            <div className="flex gap-2 overflow-x-auto rounded-2xl bg-[#2f263c]/50 p-2">
+            <div className="flex gap-2 overflow-x-auto rounded-[1.35rem] bg-white/[0.03] p-2">
               {newPreviews.map((url, i) => (
                 <img
                   key={i}
@@ -254,11 +246,11 @@ export function EditMemoryDialog({ memory, photos }: EditMemoryDialogProps) {
           <button
             type="submit"
             disabled={loading}
-            className="mt-1 inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-tr from-[#ffadf9] to-[#ff77ff] px-5 py-3 text-sm font-bold text-[#37003a] transition-shadow hover:shadow-[0_10px_30px_rgba(255,173,249,0.2)] disabled:opacity-50"
+            className="cta-primary mt-1 w-full disabled:opacity-50"
           >
             {loading ? (
               <>
-                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#37003a] border-t-transparent" />
+                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#09111f] border-t-transparent" />
                 Enregistrement...
               </>
             ) : (

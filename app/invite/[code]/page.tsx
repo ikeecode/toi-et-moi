@@ -2,6 +2,10 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { Heart } from 'lucide-react';
+import Link from 'next/link';
+
+import { FormSubmitButton } from '@/components/custom/form-submit-button';
+import { SurfacePanel } from '@/components/custom/page-shell';
 
 export default async function InviteCodePage({
   params,
@@ -20,13 +24,16 @@ export default async function InviteCodePage({
 
   if (!couple) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#180f24] px-4">
-        <div className="w-full max-w-sm rounded-[2rem] bg-white/5 backdrop-blur-[12px] border border-white/[0.08] p-8 text-center">
-          <p className="text-lg font-semibold text-[#ecddfb]">Invitation invalide</p>
-          <p className="mt-2 text-sm text-[#d7c0d1]">
+      <div className="flex min-h-screen items-center justify-center px-4">
+        <SurfacePanel className="w-full max-w-sm p-8 text-center">
+          <p className="text-lg font-semibold text-foreground">Invitation invalide</p>
+          <p className="mt-2 text-sm text-muted-foreground">
             Ce lien d&apos;invitation n&apos;est pas valide ou a expiré.
           </p>
-        </div>
+          <Link href="/" className="cta-secondary mt-6">
+            Retour à l’accueil
+          </Link>
+        </SurfacePanel>
       </div>
     );
   }
@@ -61,13 +68,16 @@ export default async function InviteCodePage({
 
   if (otherMembership) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#180f24] px-4">
-        <div className="w-full max-w-sm rounded-[2rem] bg-white/5 backdrop-blur-[12px] border border-white/[0.08] p-8 text-center">
-          <p className="text-lg font-semibold text-[#ecddfb]">Déjà en couple</p>
-          <p className="mt-2 text-sm text-[#d7c0d1]">
+      <div className="flex min-h-screen items-center justify-center px-4">
+        <SurfacePanel className="w-full max-w-sm p-8 text-center">
+          <p className="text-lg font-semibold text-foreground">Déjà en couple</p>
+          <p className="mt-2 text-sm text-muted-foreground">
             Vous êtes déjà membre d&apos;un autre espace couple.
           </p>
-        </div>
+          <Link href="/dashboard" className="cta-secondary mt-6">
+            Ouvrir mon tableau de bord
+          </Link>
+        </SurfacePanel>
       </div>
     );
   }
@@ -86,7 +96,7 @@ export default async function InviteCodePage({
     }
 
     const displayName =
-      user.user_metadata?.display_name || user.email?.split('@')[0] || 'Partner';
+      user.user_metadata?.display_name || user.email?.split('@')[0] || 'Partenaire';
 
     await supabase.from('couple_members').insert({
       couple_id: couple!.id,
@@ -102,30 +112,27 @@ export default async function InviteCodePage({
   const coupleName = couple.name || 'un espace partagé';
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#180f24] px-4">
-      <div className="w-full max-w-sm rounded-[2rem] bg-white/5 backdrop-blur-[12px] border border-white/[0.08] shadow-[0_20px_40px_rgba(255,173,249,0.08)] p-8">
+    <div className="flex min-h-screen items-center justify-center px-4">
+      <SurfacePanel className="w-full max-w-sm p-8">
         <div className="flex flex-col items-center gap-6 text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#ffadf9]/20 to-[#ff77ff]/20">
-            <Heart className="h-7 w-7 text-[#ffadf9]" />
+          <div className="icon-chip h-14 w-14 rounded-[1.2rem]">
+            <Heart className="h-7 w-7" />
           </div>
           <div>
-            <p className="text-lg font-semibold text-[#ecddfb]">
+            <p className="text-lg font-semibold text-foreground">
               Rejoindre {coupleName} ?
             </p>
-            <p className="mt-1 text-sm text-[#d7c0d1]">
+            <p className="mt-1 text-sm text-muted-foreground">
               Vous avez été invité(e) à rejoindre cet espace couple.
             </p>
           </div>
           <form action={joinCouple} className="w-full">
-            <button
-              type="submit"
-              className="w-full rounded-full bg-gradient-to-tr from-[#ffadf9] to-[#ff77ff] px-6 py-3 text-sm font-bold text-[#37003a] transition-shadow hover:shadow-[0_10px_30px_rgba(255,173,249,0.2)]"
-            >
+            <FormSubmitButton pendingLabel="Connexion à l’espace...">
               Rejoindre
-            </button>
+            </FormSubmitButton>
           </form>
         </div>
-      </div>
+      </SurfacePanel>
     </div>
   );
 }
