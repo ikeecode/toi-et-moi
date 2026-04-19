@@ -127,10 +127,13 @@ alter table public.thread_topics enable row level security;
 create policy "Members can view messages" on public.messages
   for select using (couple_id = public.get_my_couple_id());
 
-create policy "Members can insert messages" on public.messages
+-- Clients can only insert their own text messages.
+-- System messages sont insérés via la fonction SQL security-definer `create_system_message(...)`.
+create policy "Members can insert text messages" on public.messages
   for insert with check (
     couple_id = public.get_my_couple_id()
-    and (kind = 'text' and author_id = auth.uid() or kind = 'system')
+    and kind = 'text'
+    and author_id = auth.uid()
   );
 
 create policy "Authors can edit their messages" on public.messages
@@ -192,7 +195,7 @@ Au premier accès authentifié post-déploiement, une action serveur idempotente
 ### Suppression
 
 - Déplacée dans le menu kebab. Confirmation modale via `Dialog` existant.
-- Supprime le souvenir + messages liés via `on delete cascade` (à condition d'ajouter ce cascade ; alternativement, on nettoie via un trigger). Décision : ajouter `on delete cascade` conditionné côté `messages.context_id` nécessiterait un trigger ; on nettoie donc les messages `context_type='memory'` avec la clé `context_id` via un trigger `before delete on memories`.
+- Nettoyage des messages associés : `messages.context_id` est polymorphe (pas une FK), donc un cascade SQL n'est pas possible directement. On ajoute un trigger `before delete on memories` qui supprime `messages where context_type='memory' and context_id = OLD.id`. Même logique pour `thread_topics` quand un `custom_question` est supprimé.
 
 ## Fonctionnalité 2 — Rituel asynchrone
 
@@ -321,3 +324,4 @@ Nouvelles actions dans `app/memories/actions.ts` et nouveau `app/questions/actio
 | Messages orphelins après suppression d'un souvenir | Trigger `before delete on memories` supprime les messages liés. |
 | Confusion UX : le même bouton "Marquer Discutée" existe à deux endroits (thread + carte-topic) | Un seul bouton, dans le drawer thread. La carte-topic affiche seulement le statut. |
 | Abonnement Realtime unique au layout surcharge le router client | Subscription montée dans un contexte React partagé, démonté au logout. |
+| RLS : un client malveillant pourrait insérer un `message` `kind='system'` avec un `metadata.event` falsifié (puisque la politique INSERT l'autorise aux membres du couple) | Les actions serveur qui créent des messages système utilisent un helper SQL `create_system_message(...)` en `security definer` qui impose les champs valides ; la politique INSERT est durcie pour ne plus accepter `kind='system'` côté client, uniquement `kind='text' and author_id = auth.uid()`. |
