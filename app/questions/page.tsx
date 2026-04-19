@@ -1,90 +1,78 @@
-import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { QUESTIONS } from '@/lib/questions';
-import {
-  QuestionsCarousel,
-  type CustomQuestion,
-} from '@/components/custom/questions-carousel';
+import { createClient } from '@/lib/supabase/server';
 import { BottomNav } from '@/components/custom/bottom-nav';
-import { AppPage } from '@/components/custom/page-shell';
+import { QuestionsChat } from '@/components/custom/questions-chat';
+import { backfillTopicsFromProgress } from '@/app/questions/topics-actions';
+import type { MessageRow, ThreadTopicRow } from '@/lib/conversations/types';
 
 export default async function QuestionsPage() {
   const supabase = await createClient();
-
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  if (!user) redirect('/auth/login');
 
-  if (!user) {
-    redirect('/auth/login');
-  }
-
-  const { data: coupleMember } = await supabase
+  const { data: member } = await supabase
     .from('couple_members')
-    .select('couple_id, display_name')
+    .select('couple_id')
     .eq('user_id', user.id)
     .single();
+  if (!member) redirect('/setup');
 
-  if (!coupleMember) {
-    redirect('/setup');
+  await backfillTopicsFromProgress();
+
+  const { data: messagesData } = await supabase
+    .from('messages')
+    .select('*')
+    .eq('couple_id', member.couple_id)
+    .eq('context_type', 'main')
+    .order('created_at', { ascending: true });
+  const messages = (messagesData ?? []) as MessageRow[];
+
+  const messageIds = messages.map((m) => m.id);
+  const { data: readsData } = messageIds.length
+    ? await supabase.from('message_reads').select('*').in('message_id', messageIds)
+    : { data: [] };
+  const initialReads: Record<string, string[]> = {};
+  for (const row of readsData ?? []) {
+    const entry = row as { message_id: string; user_id: string };
+    (initialReads[entry.message_id] ??= []).push(entry.user_id);
   }
 
-  const { data: partner } = await supabase
+  const { data: topics } = await supabase
+    .from('thread_topics')
+    .select('*')
+    .eq('couple_id', member.couple_id);
+
+  const { data: customQuestions } = await supabase
+    .from('custom_questions')
+    .select('id, text')
+    .eq('couple_id', member.couple_id);
+
+  const { data: members } = await supabase
     .from('couple_members')
-    .select('display_name')
-    .eq('couple_id', coupleMember.couple_id)
-    .neq('user_id', user.id)
-    .single();
+    .select('user_id, display_name, nickname')
+    .eq('couple_id', member.couple_id);
 
-  const [progressResult, customQuestionsResult] = await Promise.all([
-    supabase
-      .from('questions_progress')
-      .select('question_index, custom_question_id, completed_by, completed_at')
-      .eq('couple_id', coupleMember.couple_id)
-      .order('completed_at', { ascending: false }),
-    supabase
-      .from('custom_questions')
-      .select('id, text, created_by, created_at')
-      .eq('couple_id', coupleMember.couple_id)
-      .order('created_at', { ascending: true }),
-  ]);
+  const authorNameById: Record<string, string> = {};
+  for (const m of members ?? []) {
+    authorNameById[m.user_id] = m.nickname || m.display_name || 'Toi & Moi';
+  }
 
-  const progress = progressResult.data ?? [];
-  const customQuestions: CustomQuestion[] = (customQuestionsResult.data ?? []).map(
-    (q) => ({
-      id: q.id,
-      text: q.text,
-      createdBy: q.created_by,
-    })
-  );
-
-  const completedBuiltinIndices = progress
-    .filter((p) => p.question_index != null)
-    .map((p) => p.question_index as number);
-  const completedCustomIds = progress
-    .filter((p) => p.custom_question_id != null)
-    .map((p) => p.custom_question_id as string);
-
-  const lastCompletedBy = progress[0]?.completed_by ?? null;
-  const hasPartner = !!partner;
+  const otherUserId = members?.find((m) => m.user_id !== user.id)?.user_id ?? null;
 
   return (
     <div className="min-h-screen">
-      <AppPage className="max-w-3xl gap-4 pt-4">
-        <QuestionsCarousel
-          coupleId={coupleMember.couple_id}
-          userId={user.id}
-          displayName={coupleMember.display_name}
-          partnerName={partner?.display_name ?? null}
-          hasPartner={hasPartner}
-          builtinQuestions={QUESTIONS}
-          initialCustomQuestions={customQuestions}
-          completedBuiltinIndices={completedBuiltinIndices}
-          completedCustomIds={completedCustomIds}
-          lastCompletedBy={lastCompletedBy}
-        />
-      </AppPage>
-
+      <QuestionsChat
+        coupleId={member.couple_id}
+        currentUserId={user.id}
+        otherUserId={otherUserId}
+        authorNameById={authorNameById}
+        initialMessages={messages}
+        initialReads={initialReads}
+        topics={(topics ?? []) as ThreadTopicRow[]}
+        customQuestions={customQuestions ?? []}
+      />
       <BottomNav active="questions" />
     </div>
   );
