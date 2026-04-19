@@ -246,6 +246,16 @@
     );
     animation: shimmer 1.35s infinite;
   }
+  html,
+  body {
+    scrollbar-width: none;
+  }
+  *::-webkit-scrollbar {
+    display: none;
+  }
+  * {
+    -ms-overflow-style: none;
+  }
 }
 
 @keyframes shimmer {
