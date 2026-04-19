@@ -1,11 +1,6 @@
-'use client';
-
-import { deleteMemory } from '@/app/memories/actions';
-import { EditMemoryDialog } from '@/components/custom/edit-memory-dialog';
+import Link from 'next/link';
 import { formatRelativeDate } from '@/lib/helpers';
-import { Trash2, ImageIcon } from 'lucide-react';
-import { useState } from 'react';
-import { toast } from 'sonner';
+import { ImageIcon } from 'lucide-react';
 
 interface Photo {
   id: string;
@@ -23,25 +18,12 @@ interface MemoryCardProps {
   photos: Photo[];
 }
 
-export function MemoryCard({ memory, coverPhoto, photos }: MemoryCardProps) {
-  const [deleting, setDeleting] = useState(false);
-
-  async function handleDelete(formData: FormData) {
-    setDeleting(true);
-    try {
-      await deleteMemory(formData);
-      toast.success('Souvenir supprimé.');
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : 'Impossible de supprimer ce souvenir.'
-      );
-    } finally {
-      setDeleting(false);
-    }
-  }
-
+export function MemoryCard({ memory, coverPhoto }: MemoryCardProps) {
   return (
-    <div className="group relative break-inside-avoid overflow-hidden rounded-[1.6rem] border border-white/[0.08] bg-white/[0.03] backdrop-blur-[12px] transition-all duration-300 hover:shadow-[0_16px_40px_rgba(216,154,130,0.12)]">
+    <Link
+      href={`/memories/${memory.id}`}
+      className="group relative break-inside-avoid overflow-hidden rounded-[1.6rem] border border-white/[0.08] bg-white/[0.03] backdrop-blur-[12px] transition-all duration-300 hover:shadow-[0_16px_40px_rgba(216,154,130,0.12)]"
+    >
       <div className="relative w-full overflow-hidden">
         {coverPhoto ? (
           <div className="relative aspect-[4/3] overflow-hidden">
@@ -57,22 +39,6 @@ export function MemoryCard({ memory, coverPhoto, photos }: MemoryCardProps) {
             <ImageIcon className="h-10 w-10 text-muted-foreground/50" />
           </div>
         )}
-
-        <div className="absolute right-2 top-2 flex gap-1.5">
-          <EditMemoryDialog memory={memory} photos={photos} />
-
-          <form action={handleDelete}>
-            <input type="hidden" name="memoryId" value={memory.id} />
-            <button
-              type="submit"
-              disabled={deleting}
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-[#0d1118]/75 text-foreground opacity-100 backdrop-blur-sm transition-all hover:bg-red-500/30 hover:text-red-200 sm:opacity-0 sm:group-hover:opacity-100"
-            >
-              <Trash2 className="h-3 w-3" />
-              <span className="sr-only">Supprimer le souvenir</span>
-            </button>
-          </form>
-        </div>
       </div>
 
       <div className="flex flex-col gap-1 p-4">
@@ -88,6 +54,6 @@ export function MemoryCard({ memory, coverPhoto, photos }: MemoryCardProps) {
           </p>
         )}
       </div>
-    </div>
+    </Link>
   );
 }

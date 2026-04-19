@@ -32,10 +32,22 @@ interface EditMemoryDialogProps {
     date: string;
   };
   photos: Photo[];
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function EditMemoryDialog({ memory, photos }: EditMemoryDialogProps) {
-  const [open, setOpen] = useState(false);
+export function EditMemoryDialog({
+  memory,
+  photos,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
+}: EditMemoryDialogProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+  const setOpen = isControlled
+    ? (next: boolean) => controlledOnOpenChange?.(next)
+    : setInternalOpen;
   const [loading, setLoading] = useState(false);
   const [removedPhotoIds, setRemovedPhotoIds] = useState<Set<string>>(
     new Set()
@@ -122,14 +134,16 @@ export function EditMemoryDialog({ memory, photos }: EditMemoryDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger
-        render={
-          <button className="flex h-8 w-8 items-center justify-center rounded-full bg-[#0d1118]/75 text-foreground opacity-100 backdrop-blur-sm transition-all hover:bg-[#8fb2ff]/24 hover:text-white sm:opacity-0 sm:group-hover:opacity-100">
-            <Pencil className="h-3 w-3" />
-            <span className="sr-only">Modifier le souvenir</span>
-          </button>
-        }
-      />
+      {!isControlled && (
+        <DialogTrigger
+          render={
+            <button className="flex h-8 w-8 items-center justify-center rounded-full bg-[#0d1118]/75 text-foreground opacity-100 backdrop-blur-sm transition-all hover:bg-[#8fb2ff]/24 hover:text-white sm:opacity-0 sm:group-hover:opacity-100">
+              <Pencil className="h-3 w-3" />
+              <span className="sr-only">Modifier le souvenir</span>
+            </button>
+          }
+        />
+      )}
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Modifier le souvenir</DialogTitle>
