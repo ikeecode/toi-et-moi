@@ -135,12 +135,12 @@ export function MemoryDetailView(props: Props) {
             <MoreVertical className="h-4 w-4" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onSelect={() => setEditOpen(true)}>
+            <DropdownMenuItem onClick={() => setEditOpen(true)}>
               <Pencil className="mr-2 h-4 w-4" /> Modifier
             </DropdownMenuItem>
             {!isPendingDeletion && (
               <DropdownMenuItem
-                onSelect={() => setConfirmRequest(true)}
+                onClick={() => setConfirmRequest(true)}
                 className="text-red-300"
               >
                 <Trash2 className="mr-2 h-4 w-4" /> Demander la suppression

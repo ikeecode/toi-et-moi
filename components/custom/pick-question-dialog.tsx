@@ -130,7 +130,7 @@ export function PickQuestionDialog({
             <label htmlFor="new-question" className="text-[0.7rem] uppercase tracking-[0.18em] text-muted-foreground/80">
               Créer une nouvelle question
             </label>
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row">
               <input
                 id="new-question"
                 type="text"
@@ -139,7 +139,7 @@ export function PickQuestionDialog({
                 placeholder="Écris ta question…"
                 maxLength={500}
                 disabled={isCreating}
-                className="h-10 flex-1 rounded-full border border-white/10 bg-white/[0.03] px-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none disabled:opacity-50"
+                className="h-10 w-full min-w-0 flex-1 rounded-full border border-white/10 bg-white/[0.03] px-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none disabled:opacity-50"
                 onKeyDown={(event) => {
                   if (event.key === 'Enter') {
                     event.preventDefault();
@@ -151,7 +151,7 @@ export function PickQuestionDialog({
                 type="button"
                 onClick={handleCreate}
                 disabled={isCreating || newQuestion.trim().length < 3}
-                className="cta-primary h-10 px-4 text-[0.82rem] disabled:opacity-50"
+                className="cta-primary h-10 w-full shrink-0 px-4 text-[0.82rem] disabled:opacity-50 sm:w-auto"
               >
                 {isCreating ? (
                   <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#09111f] border-t-transparent" />
