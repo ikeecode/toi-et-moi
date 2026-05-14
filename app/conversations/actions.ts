@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import type { ConversationContextType } from '@/lib/conversations/types';
+import { autoDiscussTopics } from '@/app/questions/topics-actions';
 
 async function getCurrentCouple() {
   const supabase = await createClient();
@@ -49,6 +50,12 @@ export async function postMessage(params: {
     .single();
 
   if (error || !data) throw new Error("Impossible d'envoyer le message.");
+
+  if (params.contextType === 'main') {
+    autoDiscussTopics().catch((err) => {
+      console.error('autoDiscussTopics failed', err);
+    });
+  }
 
   return data;
 }

@@ -1,6 +1,6 @@
-export const MAX_IMAGE_UPLOAD_FILES = 10;
+export const MAX_IMAGE_UPLOAD_FILES = 20;
 export const MAX_IMAGE_UPLOAD_FILE_SIZE_BYTES = 8 * 1024 * 1024;
-export const MAX_IMAGE_UPLOAD_TOTAL_SIZE_BYTES = 20 * 1024 * 1024;
+export const MAX_IMAGE_UPLOAD_TOTAL_SIZE_BYTES = 40 * 1024 * 1024;
 
 type UploadFileLike = {
   name: string;

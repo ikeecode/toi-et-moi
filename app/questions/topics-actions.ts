@@ -113,25 +113,14 @@ export async function markTopicDiscussed(topicId: string) {
     completed_by: user.id,
   });
 
-  // Message système dans le thread et dans le fil principal
-  await Promise.all([
-    insertSystemMessage(supabase, {
-      coupleId,
-      contextType: 'thread',
-      contextId: topicId,
-      event: 'topic.discussed',
-      metadata: { topicId, by: user.id },
-      authorId: user.id,
-    }),
-    insertSystemMessage(supabase, {
-      coupleId,
-      contextType: 'main',
-      contextId: null,
-      event: 'topic.discussed',
-      metadata: { topicId, by: user.id },
-      authorId: user.id,
-    }),
-  ]);
+  await insertSystemMessage(supabase, {
+    coupleId,
+    contextType: 'main',
+    contextId: null,
+    event: 'topic.discussed',
+    metadata: { topicId, by: user.id },
+    authorId: user.id,
+  });
 
   revalidatePath('/questions');
   return updated;
@@ -169,14 +158,80 @@ export async function unmarkTopicDiscussed(topicId: string) {
 
   await insertSystemMessage(supabase, {
     coupleId,
-    contextType: 'thread',
-    contextId: topicId,
+    contextType: 'main',
+    contextId: null,
     event: 'topic.undiscussed',
     metadata: { topicId, by: user.id },
     authorId: user.id,
   });
 
   revalidatePath('/questions');
+}
+
+export async function autoDiscussTopics() {
+  const { supabase, coupleId } = await getCurrentCouple();
+
+  const { data: topics } = await supabase
+    .from('thread_topics')
+    .select('id, pushed_at, discussed_at')
+    .eq('couple_id', coupleId)
+    .is('discussed_at', null)
+    .order('pushed_at', { ascending: true });
+
+  if (!topics || topics.length === 0) return;
+
+  for (const topic of topics) {
+    const { data: msgs } = await supabase
+      .from('messages')
+      .select('author_id')
+      .eq('couple_id', coupleId)
+      .eq('context_type', 'main')
+      .eq('kind', 'text')
+      .gt('created_at', topic.pushed_at);
+
+    const distinctAuthors = new Set(
+      (msgs ?? [])
+        .map((m) => (m as { author_id: string | null }).author_id)
+        .filter((id): id is string => Boolean(id))
+    );
+
+    if (distinctAuthors.size >= 2) {
+      const [firstAuthor] = distinctAuthors;
+      const { data: updated } = await supabase
+        .from('thread_topics')
+        .update({
+          discussed_at: new Date().toISOString(),
+          discussed_by: firstAuthor,
+        })
+        .eq('id', topic.id)
+        .is('discussed_at', null)
+        .select()
+        .single();
+
+      if (updated) {
+        const { error: progressError } = await supabase
+          .from('questions_progress')
+          .insert({
+            couple_id: coupleId,
+            question_index: updated.question_index,
+            custom_question_id: updated.custom_question_id,
+            completed_by: firstAuthor,
+          });
+        if (progressError && progressError.code !== '23505') {
+          console.error('autoDiscussTopics progress insert error', progressError);
+        }
+
+        await insertSystemMessage(supabase, {
+          coupleId,
+          contextType: 'main',
+          contextId: null,
+          event: 'topic.discussed',
+          metadata: { topicId: topic.id, auto: true },
+          authorId: firstAuthor,
+        });
+      }
+    }
+  }
 }
 
 export async function backfillTopicsFromProgress() {
