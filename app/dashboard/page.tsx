@@ -223,11 +223,20 @@ export default async function DashboardPage() {
     <div className="min-h-screen overflow-x-clip">
       <AppPage>
         <header className="flex items-start justify-between gap-4">
-          <div className="space-y-1">
-            <p className="text-lg font-light italic tracking-tight text-[#dbe7ff]">
-              Toi et Moi
-            </p>
-            <p className="text-sm text-muted-foreground">Aujourd&apos;hui</p>
+          <div className="flex items-center gap-3">
+            <img
+              src="/icons/icon-192.png"
+              alt=""
+              width={40}
+              height={40}
+              className="h-10 w-10 rounded-2xl object-cover ring-1 ring-white/10"
+            />
+            <div className="space-y-0.5">
+              <p className="text-lg font-light italic tracking-tight text-[#dbe7ff]">
+                Toi et Moi
+              </p>
+              <p className="text-sm text-muted-foreground">Aujourd&apos;hui</p>
+            </div>
           </div>
 
           <div className="flex items-center gap-3">

@@ -25,11 +25,17 @@ export default async function Home() {
     <div className="relative isolate overflow-hidden">
       <AppPage bottomInset={false} className="max-w-4xl gap-6 pb-14">
         <header className="flex items-center justify-between gap-4 py-1">
-          <Link
-            href="/"
-            className="text-xl font-light italic tracking-tight text-[#dbe7ff]"
-          >
-            Toi et Moi
+          <Link href="/" className="flex items-center gap-2">
+            <img
+              src="/icons/icon-192.png"
+              alt=""
+              width={36}
+              height={36}
+              className="h-9 w-9 rounded-xl object-cover ring-1 ring-white/10"
+            />
+            <span className="text-xl font-light italic tracking-tight text-[#dbe7ff]">
+              Toi et Moi
+            </span>
           </Link>
 
           <Link href="/auth/login" className="cta-secondary px-4 py-2.5 text-sm">

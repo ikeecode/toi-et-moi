@@ -29,11 +29,17 @@ export function AuthShell({
     <div className="relative isolate min-h-dvh overflow-hidden px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto grid min-h-[calc(100dvh-3rem)] max-w-6xl items-center gap-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,460px)]">
         <section className="relative z-10 hidden flex-col gap-8 lg:flex">
-          <Link
-            href="/"
-            className="w-fit text-3xl font-light italic tracking-tight text-[#dbe7ff]"
-          >
-            Toi et Moi
+          <Link href="/" className="flex w-fit items-center gap-3">
+            <img
+              src="/icons/icon-192.png"
+              alt=""
+              width={48}
+              height={48}
+              className="h-12 w-12 rounded-2xl object-cover ring-1 ring-white/10"
+            />
+            <span className="text-3xl font-light italic tracking-tight text-[#dbe7ff]">
+              Toi et Moi
+            </span>
           </Link>
 
           <div className="max-w-xl space-y-5">
@@ -67,11 +73,17 @@ export function AuthShell({
         </section>
 
         <section className="relative z-10 flex flex-col gap-5">
-          <Link
-            href="/"
-            className="mx-auto text-2xl font-light italic tracking-tight text-[#dbe7ff] lg:hidden"
-          >
-            Toi et Moi
+          <Link href="/" className="mx-auto flex items-center gap-2.5 lg:hidden">
+            <img
+              src="/icons/icon-192.png"
+              alt=""
+              width={40}
+              height={40}
+              className="h-10 w-10 rounded-2xl object-cover ring-1 ring-white/10"
+            />
+            <span className="text-2xl font-light italic tracking-tight text-[#dbe7ff]">
+              Toi et Moi
+            </span>
           </Link>
 
           <div className="space-y-3 text-center lg:hidden">
