@@ -11,7 +11,6 @@ interface MessageListProps {
   otherUserId: string | null;
   reads: Record<string, Set<string>>;
   authorNameById: Record<string, string>;
-  onOpenTopicThread?: (topicId: string) => void;
 }
 
 export function MessageList({
@@ -20,7 +19,6 @@ export function MessageList({
   otherUserId,
   reads,
   authorNameById,
-  onOpenTopicThread,
 }: MessageListProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -36,9 +34,7 @@ export function MessageList({
             <SystemEvent
               key={message.id}
               message={message as MessageRow}
-              currentUserId={currentUserId}
               authorName={authorNameById[message.author_id ?? ''] ?? 'Quelqu’un'}
-              onOpenTopicThread={onOpenTopicThread}
             />
           );
         }

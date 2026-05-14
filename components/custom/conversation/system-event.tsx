@@ -9,18 +9,12 @@ import type { MessageRow, MemoryDiff } from '@/lib/conversations/types';
 
 interface SystemEventProps {
   message: MessageRow;
-  currentUserId: string;
   authorName: string;
-  onOpenTopicThread?: (topicId: string) => void;
-  onMarkTopicDiscussed?: (topicId: string) => void;
 }
 
 export function SystemEvent({
   message,
-  currentUserId,
   authorName,
-  onOpenTopicThread,
-  onMarkTopicDiscussed,
 }: SystemEventProps) {
   const meta = message.metadata as { event?: string } & Record<string, unknown>;
 
@@ -37,14 +31,39 @@ export function SystemEvent({
     return <EditedEvent message={message} diff={diff} authorName={authorName} />;
   }
 
+  if (meta.event === 'memory.deletion_requested') {
+    return (
+      <SystemLine>
+        <span>
+          {authorName} a demandé la suppression {formatRel(message.created_at)}
+        </span>
+      </SystemLine>
+    );
+  }
+
+  if (meta.event === 'memory.deletion_canceled') {
+    return (
+      <SystemLine>
+        <span>Demande de suppression annulée {formatRel(message.created_at)}</span>
+      </SystemLine>
+    );
+  }
+
+  if (meta.event === 'memory.deletion_refused') {
+    return (
+      <SystemLine>
+        <span>
+          {authorName} a refusé la suppression {formatRel(message.created_at)}
+        </span>
+      </SystemLine>
+    );
+  }
+
   if (meta.event === 'topic.pushed') {
     return (
       <TopicPushedCard
         message={message}
-        currentUserId={currentUserId}
         authorName={authorName}
-        onOpen={onOpenTopicThread}
-        onMark={onMarkTopicDiscussed}
       />
     );
   }
@@ -150,16 +169,10 @@ function DiffRow({ label, from, to }: { label: string; from: string; to: string 
 
 function TopicPushedCard({
   message,
-  currentUserId,
   authorName,
-  onOpen,
-  onMark,
 }: {
   message: MessageRow;
-  currentUserId: string;
   authorName: string;
-  onOpen?: (topicId: string) => void;
-  onMark?: (topicId: string) => void;
 }) {
   const meta = message.metadata as {
     topicId: string;
@@ -184,15 +197,6 @@ function TopicPushedCard({
       <p className="mt-3 text-sm font-semibold leading-snug text-foreground">
         {meta.questionText}
       </p>
-      <div className="mt-3 flex gap-2">
-        <button
-          type="button"
-          onClick={() => onOpen?.(meta.topicId)}
-          className="cta-primary h-10 flex-1 px-4 text-[0.82rem]"
-        >
-          Ouvrir la discussion
-        </button>
-      </div>
     </div>
   );
 }

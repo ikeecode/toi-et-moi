@@ -33,6 +33,8 @@ create table public.memories (
   description text,
   date date not null default current_date,
   created_by uuid references auth.users(id) not null,
+  pending_deletion_at timestamp with time zone,
+  pending_deletion_by uuid references auth.users(id),
   created_at timestamp with time zone default now()
 );
 

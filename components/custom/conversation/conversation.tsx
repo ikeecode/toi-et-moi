@@ -27,7 +27,6 @@ interface ConversationProps {
   authorNameById: Record<string, string>;
   composerSlot?: ReactNode;
   placeholder?: string;
-  onOpenTopicThread?: (topicId: string) => void;
 }
 
 export function Conversation(props: ConversationProps) {
@@ -116,7 +115,6 @@ export function Conversation(props: ConversationProps) {
           otherUserId={props.otherUserId}
           reads={reads}
           authorNameById={props.authorNameById}
-          onOpenTopicThread={props.onOpenTopicThread}
         />
         {someoneTyping && props.otherUserId && (
           <TypingIndicator

@@ -24,14 +24,16 @@ async function getCurrentCouple() {
 export async function createMemory(formData: FormData) {
   const { supabase, user, coupleId } = await getCurrentCouple();
 
-  const title = formData.get('title') as string;
-  const description = formData.get('description') as string;
-  const date = formData.get('date') as string;
+  const title = (formData.get('title') as string)?.trim();
+  const description = (formData.get('description') as string)?.trim();
+  const rawDate = (formData.get('date') as string)?.trim();
+  const date = rawDate || new Date().toISOString().slice(0, 10);
   const images = (formData.getAll('images') as File[]).filter(
     (image) => image && image.size > 0
   );
 
-  if (!title || !date) throw new Error('Le titre et la date sont requis.');
+  if (!title) throw new Error('Le titre est requis.');
+  if (!description) throw new Error('La description est requise.');
 
   const validationError = validateImageUpload(images);
   if (validationError) throw new Error(validationError);
@@ -90,15 +92,18 @@ export async function updateMemory(formData: FormData) {
   const { supabase, user, coupleId } = await getCurrentCouple();
 
   const memoryId = formData.get('memoryId') as string;
-  const title = formData.get('title') as string;
-  const description = formData.get('description') as string;
-  const date = formData.get('date') as string;
+  const title = (formData.get('title') as string)?.trim();
+  const description = (formData.get('description') as string)?.trim();
+  const rawDate = (formData.get('date') as string)?.trim();
+  const date = rawDate || new Date().toISOString().slice(0, 10);
   const removedPhotoIds = formData.getAll('removedPhotoIds') as string[];
   const newImages = (formData.getAll('newImages') as File[]).filter(
     (image) => image && image.size > 0
   );
 
-  if (!memoryId || !title || !date) throw new Error('Le titre et la date sont requis.');
+  if (!memoryId) throw new Error("L'identifiant du souvenir est requis.");
+  if (!title) throw new Error('Le titre est requis.');
+  if (!description) throw new Error('La description est requise.');
 
   const { data: before } = await supabase
     .from('memories')
@@ -204,19 +209,97 @@ export async function updateMemory(formData: FormData) {
   revalidatePath(`/memories/${memoryId}`);
 }
 
-export async function deleteMemory(formData: FormData) {
-  const { supabase, coupleId } = await getCurrentCouple();
-
-  const memoryId = formData.get('memoryId') as string;
+export async function requestMemoryDeletion(memoryId: string) {
+  const { supabase, user, coupleId } = await getCurrentCouple();
   if (!memoryId) throw new Error("L'identifiant du souvenir est requis.");
 
   const { data: memory } = await supabase
     .from('memories')
-    .select('id, couple_id')
+    .select('id, pending_deletion_at, pending_deletion_by')
     .eq('id', memoryId)
     .eq('couple_id', coupleId)
     .single();
   if (!memory) throw new Error('Souvenir introuvable.');
+  if (memory.pending_deletion_at) {
+    throw new Error('Une demande de suppression est déjà en cours.');
+  }
+
+  const requestedAt = new Date().toISOString();
+  const { error } = await supabase
+    .from('memories')
+    .update({
+      pending_deletion_at: requestedAt,
+      pending_deletion_by: user.id,
+    })
+    .eq('id', memoryId);
+  if (error) throw new Error('Impossible de demander la suppression.');
+
+  await insertSystemMessage(supabase, {
+    coupleId,
+    contextType: 'memory',
+    contextId: memoryId,
+    event: 'memory.deletion_requested',
+    metadata: {},
+    authorId: user.id,
+  });
+
+  revalidatePath('/memories');
+  revalidatePath(`/memories/${memoryId}`);
+}
+
+export async function cancelMemoryDeletion(memoryId: string) {
+  const { supabase, user, coupleId } = await getCurrentCouple();
+  if (!memoryId) throw new Error("L'identifiant du souvenir est requis.");
+
+  const { data: memory } = await supabase
+    .from('memories')
+    .select('id, pending_deletion_at, pending_deletion_by')
+    .eq('id', memoryId)
+    .eq('couple_id', coupleId)
+    .single();
+  if (!memory) throw new Error('Souvenir introuvable.');
+  if (!memory.pending_deletion_at) {
+    throw new Error('Aucune demande de suppression en cours.');
+  }
+
+  const wasRequester = memory.pending_deletion_by === user.id;
+
+  const { error } = await supabase
+    .from('memories')
+    .update({ pending_deletion_at: null, pending_deletion_by: null })
+    .eq('id', memoryId);
+  if (error) throw new Error("Impossible d'annuler la demande.");
+
+  await insertSystemMessage(supabase, {
+    coupleId,
+    contextType: 'memory',
+    contextId: memoryId,
+    event: wasRequester ? 'memory.deletion_canceled' : 'memory.deletion_refused',
+    metadata: {},
+    authorId: user.id,
+  });
+
+  revalidatePath('/memories');
+  revalidatePath(`/memories/${memoryId}`);
+}
+
+export async function approveMemoryDeletion(memoryId: string) {
+  const { supabase, user, coupleId } = await getCurrentCouple();
+  if (!memoryId) throw new Error("L'identifiant du souvenir est requis.");
+
+  const { data: memory } = await supabase
+    .from('memories')
+    .select('id, pending_deletion_at, pending_deletion_by')
+    .eq('id', memoryId)
+    .eq('couple_id', coupleId)
+    .single();
+  if (!memory) throw new Error('Souvenir introuvable.');
+  if (!memory.pending_deletion_at) {
+    throw new Error('Aucune demande de suppression en cours.');
+  }
+  if (memory.pending_deletion_by === user.id) {
+    throw new Error("Vous ne pouvez pas approuver votre propre demande.");
+  }
 
   const storagePath = `${coupleId}/${memoryId}`;
   const { data: files } = await supabase.storage
@@ -229,7 +312,6 @@ export async function deleteMemory(formData: FormData) {
 
   await supabase.from('memory_photos').delete().eq('memory_id', memoryId);
   await supabase.from('memories').delete().eq('id', memoryId);
-  // messages cleanup via trigger
 
   revalidatePath('/memories');
 }

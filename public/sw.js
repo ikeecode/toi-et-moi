@@ -1,8 +1,13 @@
-const CACHE_VERSION = 3;
+const CACHE_VERSION = 4;
 const CACHE_NAME = `toi-et-moi-v${CACHE_VERSION}`;
+const OFFLINE_URL = '/offline';
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE_NAME));
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) =>
+      cache.add(new Request(OFFLINE_URL, { cache: 'reload' })).catch(() => undefined)
+    )
+  );
 });
 
 self.addEventListener('activate', (event) => {
@@ -22,6 +27,20 @@ function isStaticAsset(url) {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+
+  // Navigation requests: try network, fall back to the offline page when offline.
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).catch(() =>
+        caches.open(CACHE_NAME).then((cache) =>
+          cache.match(OFFLINE_URL).then((cached) =>
+            cached ?? new Response('Hors ligne', { status: 503, statusText: 'Offline' })
+          )
+        )
+      )
+    );
+    return;
+  }
 
   // Only cache static assets — never cache HTML pages or RSC payloads
   // so that auth-gated, dynamic data (like questions progress) is always fresh.

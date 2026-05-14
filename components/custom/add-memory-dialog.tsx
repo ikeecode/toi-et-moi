@@ -80,6 +80,7 @@ export function AddMemoryDialog() {
   }
 
   function handleOpenChange(nextOpen: boolean) {
+    if (!nextOpen && loading) return;
     setOpen(nextOpen);
     if (!nextOpen) {
       setPreviews([]);
@@ -99,7 +100,10 @@ export function AddMemoryDialog() {
           </button>
         }
       />
-      <DialogContent className="sm:max-w-md">
+      <DialogContent
+        className="relative sm:max-w-md"
+        showCloseButton={!loading}
+      >
         <DialogHeader>
           <DialogTitle>Créer un souvenir</DialogTitle>
           <DialogDescription>
@@ -107,8 +111,11 @@ export function AddMemoryDialog() {
           </DialogDescription>
         </DialogHeader>
         <form action={handleSubmit} className="flex flex-col gap-4">
+          <fieldset disabled={loading} className="contents">
           <div className="flex flex-col gap-2">
-            <Label htmlFor="title" className="form-label">Titre</Label>
+            <Label htmlFor="title" className="form-label">
+              Titre <span aria-hidden className="text-[#ff9aa2]">*</span>
+            </Label>
             <Input
               id="title"
               name="title"
@@ -119,29 +126,35 @@ export function AddMemoryDialog() {
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="description" className="form-label">Description</Label>
+            <Label htmlFor="description" className="form-label">
+              Description <span aria-hidden className="text-[#ff9aa2]">*</span>
+            </Label>
             <Textarea
               id="description"
               name="description"
               placeholder="Racontez l'histoire..."
               rows={3}
+              required
               className="min-h-28 text-foreground placeholder:text-muted-foreground"
             />
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="date" className="form-label">Date</Label>
+            <Label htmlFor="date" className="form-label">
+              Date <span className="text-muted-foreground">(optionnel)</span>
+            </Label>
             <Input
               id="date"
               name="date"
               type="date"
-              required
               className="text-foreground"
             />
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="images" className="form-label">Photos</Label>
+            <Label htmlFor="images" className="form-label">
+              Photos <span className="text-muted-foreground">(optionnel)</span>
+            </Label>
             <div
               className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-[1.6rem] border-2 border-dashed border-white/12 bg-white/[0.03] p-6 transition-colors hover:border-[#8fb2ff]/40"
               onClick={() => fileInputRef.current?.click()}
@@ -194,7 +207,21 @@ export function AddMemoryDialog() {
               </>
             )}
           </button>
+          </fieldset>
         </form>
+        {loading && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-[1.75rem] bg-popover/85 backdrop-blur-sm">
+            <div className="flex flex-col items-center gap-3 px-6 text-center">
+              <span className="h-10 w-10 animate-spin rounded-full border-[3px] border-[#8fb2ff] border-t-transparent" />
+              <p className="text-sm font-medium text-foreground">
+                Création du souvenir…
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Merci de patienter, l’envoi peut prendre quelques secondes.
+              </p>
+            </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

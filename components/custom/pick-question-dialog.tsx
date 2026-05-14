@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useTransition, type ReactElement } from 'react';
-import { Search } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Plus, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -13,6 +14,7 @@ import {
 import { cn } from '@/lib/utils';
 import { QUESTIONS, type Question } from '@/lib/questions';
 import { pushTopic } from '@/app/questions/topics-actions';
+import { addCustomQuestion } from '@/app/questions/actions';
 
 interface CustomQuestion {
   id: string;
@@ -37,7 +39,10 @@ export function PickQuestionDialog({
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<1 | 2 | 3 | 4>(1);
   const [search, setSearch] = useState('');
+  const [newQuestion, setNewQuestion] = useState('');
   const [isPending, startTransition] = useTransition();
+  const [isCreating, startCreate] = useTransition();
+  const router = useRouter();
 
   const builtinFiltered: Question[] = QUESTIONS.filter((q) => q.set === tab).filter(
     (q) => q.text.toLowerCase().includes(search.toLowerCase())
@@ -56,6 +61,30 @@ export function PickQuestionDialog({
       } catch (error) {
         toast.error(
           error instanceof Error ? error.message : 'Impossible de pousser la question.'
+        );
+      }
+    });
+  }
+
+  function handleCreate() {
+    const text = newQuestion.trim();
+    if (text.length < 3) {
+      toast.error('La question doit contenir au moins 3 caractères.');
+      return;
+    }
+    startCreate(async () => {
+      try {
+        const created = await addCustomQuestion(text);
+        setNewQuestion('');
+        toast.success('Question créée.');
+        router.refresh();
+        await pushTopic({ customQuestionId: created.id });
+        toast.success('Question ajoutée au fil.');
+        setOpen(false);
+        onPushed?.();
+      } catch (error) {
+        toast.error(
+          error instanceof Error ? error.message : 'Impossible de créer la question.'
         );
       }
     });
@@ -95,6 +124,45 @@ export function PickQuestionDialog({
             className="h-10 w-full rounded-full border border-white/10 bg-white/[0.03] pl-9 pr-3 text-sm focus:outline-none"
           />
         </div>
+
+        {tab === 4 && (
+          <div className="flex flex-col gap-2 rounded-[1.1rem] border border-white/10 bg-white/[0.02] p-3">
+            <label htmlFor="new-question" className="text-[0.7rem] uppercase tracking-[0.18em] text-muted-foreground/80">
+              Créer une nouvelle question
+            </label>
+            <div className="flex gap-2">
+              <input
+                id="new-question"
+                type="text"
+                value={newQuestion}
+                onChange={(event) => setNewQuestion(event.target.value)}
+                placeholder="Écris ta question…"
+                maxLength={500}
+                disabled={isCreating}
+                className="h-10 flex-1 rounded-full border border-white/10 bg-white/[0.03] px-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none disabled:opacity-50"
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    event.preventDefault();
+                    handleCreate();
+                  }
+                }}
+              />
+              <button
+                type="button"
+                onClick={handleCreate}
+                disabled={isCreating || newQuestion.trim().length < 3}
+                className="cta-primary h-10 px-4 text-[0.82rem] disabled:opacity-50"
+              >
+                {isCreating ? (
+                  <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#09111f] border-t-transparent" />
+                ) : (
+                  <Plus className="h-4 w-4" />
+                )}
+                Créer & envoyer
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="max-h-[50vh] space-y-2 overflow-y-auto">
           {tab !== 4 &&
@@ -141,7 +209,7 @@ export function PickQuestionDialog({
             })}
           {tab === 4 && customFiltered.length === 0 && (
             <p className="py-6 text-center text-sm text-muted-foreground">
-              Ajoutez vos propres questions depuis la carte « + » du fil.
+              Aucune question perso pour l’instant. Crée-en une au-dessus.
             </p>
           )}
         </div>
