@@ -146,7 +146,7 @@ export function EditMemoryDialog({
         />
       )}
       <DialogContent
-        className="relative max-h-[90vh] overflow-y-auto sm:max-w-md"
+        className="max-h-[90vh] overflow-y-auto sm:max-w-md"
         showCloseButton={!loading}
       >
         <DialogHeader>
